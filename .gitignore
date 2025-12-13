@@ -1,0 +1,47 @@
+# API keys and secrets
+.env
+.env~
+
+
+
+# Dependency directory
+node_modules
+bower_components
+
+# Editors
+.idea
+*.iml
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# TypeScript build info files
+*.tsbuildinfo
+
+# Ignore built ts files
+dist
+
+# Docker folder to help skip auth refreshes
+.docker
+
+bundle
+
+# Test report files
+junit.xml
+packages/*/coverage/
+
+# Generated files
+packages/cli/src/generated/
+packages/core/src/generated/
+.integration-tests/
+packages/vscode-ide-companion/*.vsix
+packages/cli/download-ripgrep*/
+
+# GHA credentials
+gha-creds-*.json
+
+# Log files
+patch_output.log
+
+.genkit

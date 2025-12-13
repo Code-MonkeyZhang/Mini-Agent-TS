@@ -1,0 +1,17 @@
+{
+  "name": "my-ai-project-root",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "start": "npm run start --workspaces"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.2",
+    "esbuild": "^0.27.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
