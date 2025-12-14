@@ -3,6 +3,20 @@
 import { Command } from "commander";
 import * as path from "node:path";
 import * as fs from "node:fs";
+import { fileURLToPath } from "node:url";
+
+function getProjectVersion(): string {
+  const here = path.dirname(fileURLToPath(import.meta.url));
+  const packageJsonPath = path.resolve(here, "..", "package.json"); // src/.. 或 dist/.. 都是根目录
+  try {
+    const pkg = JSON.parse(fs.readFileSync(packageJsonPath, "utf8")) as {
+      version?: unknown;
+    };
+    return typeof pkg.version === "string" ? pkg.version : "0.0.0";
+  } catch {
+    return "0.0.0";
+  }
+}
 
 function print_banner(): void {
   const BOX_WIDTH = 58;
@@ -29,13 +43,12 @@ function print_banner(): void {
   console.log();
 }
 
-// 用户可以不提供 --workspace 这个参数。如果用户只运行 mini-agent 而没有提供 -w 或 --workspace，那么解析出来的 workspace 的值就是 undefined。
 function parseArgs(): { workspace: string | undefined } {
   const program = new Command();
 
   program
     .description("Mini Agent - AI assistant with file tools and MCP support")
-    .version("mini-agent-ts 0.0.1", "-v, --version")
+    .version(getProjectVersion(), "-v, --version")
     .configureHelp({
       // 确保帮助信息中包含 epilog 的内容
       // commander 默认将 epilog 作为 description 的一部分或在 help 底部
