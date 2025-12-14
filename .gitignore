@@ -41,3 +41,5 @@ packages/cli/download-ripgrep*/
 # GHA credentials
 gha-creds-*.json
 
+#agent
+agent_memory
