@@ -38,7 +38,7 @@ export abstract class LLMClientBase {
    * @param tools Optional list of available tools
    * @returns Dictionary containing the request payload
    */
-  public abstract prepareRequest(): Record<string, any>;
+  public abstract prepareRequest(messages: Message[]): Record<string, any>;
 
   /**
    * Convert internal message format to API-specific format.

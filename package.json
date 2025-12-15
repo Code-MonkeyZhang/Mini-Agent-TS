@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "commander": "^14.0.2",
+    "openai": "^6.10.0",
     "yaml": "^2.8.2"
   }
 }
