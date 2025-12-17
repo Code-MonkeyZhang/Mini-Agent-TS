@@ -1,0 +1,18 @@
+# ===== LLM Configuration =====
+
+# minimax
+# api_key: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJHcm91cE5hbWUiOiJKb25hdGhhbiBaaGFuZyIsIlVzZXJOYW1lIjoiSm9uYXRoYW4gWmhhbmciLCJBY2NvdW50IjoiIiwiU3ViamVjdElEIjoiMTk5OTEzNzI4MjE3MDI5NDc3MSIsIlBob25lIjoiMTk5NjgyOTczNTMiLCJHcm91cElEIjoiMTk5OTEzNzI4MjE2MTkwNjE2MyIsIlBhZ2VOYW1lIjoiIiwiTWFpbCI6IiIsIkNyZWF0ZVRpbWUiOiIyMDI1LTEyLTEyIDE1OjUxOjE3IiwiVG9rZW5UeXBlIjo0LCJpc3MiOiJtaW5pbWF4In0.n6YX0k0orPDgh9OrcSBKMxuz6MX63frJcznJVbab3C3XWipyTt-0cJhPODxkznIeAyZTCTzeZmEQU54-EtAIkCXmY28t1TUNdxW1BvNWmOIn9Vv_cIEWfVAOuoyknGvnZvj5GxQ4P87V27WwzaaAiVy_Kus7npo3mkXLdFAwYVy3425OdZ-nNrmdfDSE9uogtYHWK7YuERRToPdFxy8qVa-89DvFau6nMWE7XsaKs24tdsG8CyRFqaqvJdzdQ811ACxzaHTkkm-zcHvpOjkLseXouNRvav2RE3sYclgudriiYA6LnfTdatM9zk1jQNZR9dgRs17q8Ho9c5Lu_Z6LSQ"
+# model: "MiniMax-M2"
+# api_base: "https://api.minimaxi.com/v1" # China users
+
+# 硅基流动
+api_key: "sk-nqxdggrqmzcqizclqxqwfpcyxjfnmfclqmjrxkgzdlxbpmpl"
+api_base: "https://api.siliconflow.cn" # China users
+model: "deepseek-ai/DeepSeek-V3"
+
+# LLM provider: "anthropic" or "openai"
+provider: "openai" # Default: anthropic
+
+# ===== Agent Configuration =====
+workspace_dir: "./workspace" # Working directory
+system_prompt_path: "system_prompt.md" # System prompt file (same config directory)
