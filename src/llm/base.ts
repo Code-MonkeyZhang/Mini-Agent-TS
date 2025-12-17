@@ -1,4 +1,4 @@
-import type { Message, LLMResponse } from "../schema/index.js";
+import type { Message, LLMResponse, LLMStreamChunk } from "../schema/index.js";
 import { RetryConfig } from "../config.js";
 
 export abstract class LLMClientBase {
@@ -40,6 +40,18 @@ export abstract class LLMClientBase {
     messages: Message[],
     tools?: unknown[] | null
   ): Promise<LLMResponse>;
+
+  /**
+   * Generate streaming response from LLM.
+   *
+   * @param messages List of conversation messages
+   * @param tools Optional list of tool objects
+   * @returns AsyncGenerator yielding LLMStreamChunk
+   */
+  public abstract generateStream(
+    messages: Message[],
+    tools?: unknown[] | null
+  ): AsyncGenerator<LLMStreamChunk>;
 
   /**
    * Prepare the request payload for the API.

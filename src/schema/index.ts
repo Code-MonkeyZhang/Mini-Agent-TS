@@ -8,4 +8,5 @@ export {
   type ContentBlock,
   type TokenUsage,
   type LLMResponse,
+  type LLMStreamChunk,
 } from "./schema.js";

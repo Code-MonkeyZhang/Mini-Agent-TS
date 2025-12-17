@@ -1,6 +1,7 @@
 import {
   LLMProvider,
   type LLMResponse,
+  type LLMStreamChunk,
   type Message,
 } from "../schema/schema.js";
 import { LLMClientBase } from "./base.js";
@@ -50,5 +51,12 @@ export class LLMClient {
     tools?: any[] | null
   ): Promise<LLMResponse> {
     return await this.llmClient.generate(messages, tools);
+  }
+
+  async *generateStream(
+    messages: Message[],
+    tools?: any[] | null
+  ): AsyncGenerator<LLMStreamChunk> {
+    yield* this.llmClient.generateStream(messages, tools);
   }
 }

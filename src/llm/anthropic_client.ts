@@ -2,6 +2,7 @@ import OpenAI from "openai";
 import type {
   Message,
   LLMResponse,
+  LLMStreamChunk,
   TokenUsage,
   FunctionCall,
   ToolCall,
@@ -139,5 +140,31 @@ export class AnthropicClient extends LLMClientBase {
     );
 
     return this.parseResponse(response);
+  }
+
+  public override async *generateStream(
+    messages: Message[],
+    tools?: any[] | null
+  ): AsyncGenerator<LLMStreamChunk> {
+    const [, apiMessages] = this.convertMessages(messages);
+
+    const stream = await this.client.chat.completions.create({
+      model: this.model,
+      messages:
+        apiMessages as OpenAI.Chat.Completions.ChatCompletionMessageParam[],
+      stream: true,
+    });
+
+    for await (const chunk of stream) {
+      const delta = chunk.choices[0]?.delta;
+      const finishReason = chunk.choices[0]?.finish_reason;
+
+      yield {
+        content: delta?.content || undefined,
+        thinking: (delta as any)?.reasoning_content || undefined,
+        done: finishReason !== null && finishReason !== undefined,
+        finish_reason: finishReason || undefined,
+      };
+    }
   }
 }

@@ -52,3 +52,14 @@ export interface LLMResponse {
   finish_reason: string;
   usage?: TokenUsage | null;
 }
+
+// ============ 流式响应 ============
+
+export interface LLMStreamChunk {
+  content?: string;
+  thinking?: string;
+  tool_calls?: ToolCall[];
+  finish_reason?: string;
+  usage?: TokenUsage;
+  done: boolean;
+}
