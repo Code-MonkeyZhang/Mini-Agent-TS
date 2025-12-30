@@ -7,9 +7,17 @@ import type { Message } from "../src/schema/schema";
  * LLM API Integration Test
  *
  * 这是一个集成测试，会实际调用 LLM API。
- * 确保在运行前已正确配置 config.yaml 中的 api_key。
+ * 默认不会在 `npm run preflight` 中运行；需要显式开启：
+ *
+ *   MINI_AGENT_TS_RUN_LLM_INTEGRATION_TESTS=1 npm run test:run
+ *
+ * 运行前请确保已正确配置 `Mini-Agent-TS/config.yaml`（包含 `api_key`），并且当前环境允许网络访问。
  */
-describe("LLM API Integration", () => {
+const describeIf = (condition: boolean) => (condition ? describe : describe.skip);
+const shouldRunIntegration =
+  process.env.MINI_AGENT_TS_RUN_LLM_INTEGRATION_TESTS === "1";
+
+describeIf(shouldRunIntegration)("LLM API Integration", () => {
   let llmClient: LLMClient;
   let configLoaded = false;
 
