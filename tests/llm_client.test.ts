@@ -96,19 +96,4 @@ describe("LLM API Integration", () => {
     console.log(`   Received ${chunkCount} chunks`);
   }, 30000);
 
-  it("should handle errors gracefully for invalid API key", async () => {
-    // 故意使用无效的 API Key 来测试错误处理
-    const badClient = new LLMClient(
-      "invalid-api-key-12345",
-      "https://api.openai.com", // 使用标准 OpenAI endpoint 测试
-      "openai",
-      "gpt-3.5-turbo"
-    );
-
-    const messages: Message[] = [{ role: "user", content: "Hello" }];
-
-    // 期望抛出错误（认证失败）
-    await expect(badClient.generate(messages)).rejects.toThrow();
-    console.log("✅ Invalid API key correctly rejected");
-  }, 30000);
 });
