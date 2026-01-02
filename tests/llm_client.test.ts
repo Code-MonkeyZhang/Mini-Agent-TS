@@ -6,8 +6,10 @@ import type { Message } from "../src/schema/schema.js";
 /**
  * LLM API Integration Test
  *
- * 这是一个集成测试，会实际调用 LLM API。
- * 运行前请确保已正确配置 `Mini-Agent-TS/config/config.yaml`（测试从 `Mini-Agent-TS/` 目录运行时即 `./config/config.yaml`），并且当前环境允许网络访问。
+ * This is an integration test that will make real calls to the LLM API.
+ * Before running, ensure `Mini-Agent-TS/config/config.yaml` is configured correctly
+ * (when running from `Mini-Agent-TS/`, the path is `./config/config.yaml`) and that
+ * your environment allows network access.
  */
 describe("LLM API Integration (stream)", () => {
   it("should stream a response from the configured LLM API", async () => {

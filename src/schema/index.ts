@@ -1,4 +1,4 @@
-// Barrel 文件：统一导出所有类型
+// Barrel file: re-export all types from a single entry point
 
 export {
   LLMProvider,

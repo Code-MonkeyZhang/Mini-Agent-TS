@@ -1,31 +1,31 @@
 // ============================================================
-// JSON Schema 类型定义
+// JSON Schema type definitions
 // ============================================================
 
 /**
- * JSON Schema 类型
- * 用于定义 Tool 的参数结构，遵循 JSON Schema 规范
- * 例如: { type: "object", properties: { path: { type: "string" } }, required: ["path"] }
+ * JSON Schema type.
+ * Used to describe a Tool's parameter structure following the JSON Schema spec.
+ * Example: { type: "object", properties: { path: { type: "string" } }, required: ["path"] }
  */
 export type JsonSchema = Record<string, unknown>;
 
 /**
- * Tool 输入参数的基础类型
- * 所有 Tool 的 execute() 方法接收的参数都应该符合这个类型
+ * Base type for Tool input parameters.
+ * All Tool `execute()` methods should accept parameters compatible with this type.
  */
 export type ToolInput = Record<string, unknown>;
 
 // ============================================================
-// Tool 执行结果
+// Tool execution result
 // ============================================================
 
 /**
- * Tool 执行结果的统一结构
- * 所有 Tool 的 execute() 方法都必须返回符合此结构的对象
+ * Unified structure for Tool execution results.
+ * All Tool `execute()` methods must return an object that matches this shape.
  *
- * @property success - 执行是否成功
- * @property content - 执行结果内容（成功时的输出文本）
- * @property error   - 错误信息（失败时的错误描述，可选）
+ * @property success - Whether the execution succeeded
+ * @property content - Result content (output text when successful)
+ * @property error   - Error message (optional, when failed)
  */
 export interface ToolResult {
   success: boolean;
@@ -34,13 +34,13 @@ export interface ToolResult {
 }
 
 /**
- * 带元数据的 Tool 结果（扩展版）
- * 用于需要返回额外字段的 Tool（如 BashTool 需要返回 stdout/stderr/exitCode）
+ * Tool result with extra metadata (extended).
+ * Useful for tools that need to return additional fields (e.g. BashTool returning stdout/stderr/exitCode).
  *
- * @template TMeta - 额外元数据的类型，必须是 Record<string, unknown> 的子类型
+ * @template TMeta - Type of extra metadata, must extend Record<string, unknown>
  *
  * @example
- * // 定义 Bash 工具的返回类型
+ * // Define the return type for a Bash tool
  * type BashResult = ToolResultWithMeta<{
  *   stdout: string;
  *   stderr: string;
@@ -53,19 +53,19 @@ export type ToolResultWithMeta<
 > = ToolResult & TMeta;
 
 // ============================================================
-// Tool 接口定义
+// Tool interface
 // ============================================================
 
 /**
- * Tool 接口 - 所有工具必须实现的核心接口
+ * Tool interface - the core interface all tools must implement.
  *
- * @template Input  - 该 Tool 接受的输入参数类型
- * @template Output - 该 Tool 返回的结果类型（必须是 ToolResult 的子类型）
+ * @template Input  - Input parameter type accepted by the tool
+ * @template Output - Result type returned by the tool (must extend ToolResult)
  *
- * @property name        - 工具名称，LLM 调用时使用此名称
- * @property description - 工具描述，告诉 LLM 这个工具的用途和使用方法
- * @property parameters  - JSON Schema 格式的参数定义，LLM 根据此生成正确的参数
- * @method execute       - 异步执行方法，接收参数并返回执行结果
+ * @property name        - Tool name (used by the LLM when calling the tool)
+ * @property description - Tool description (tells the LLM what it does and how to use it)
+ * @property parameters  - JSON Schema parameter definition (used by the LLM to construct valid args)
+ * @method execute       - Async execution method that takes params and returns a result
  *
  * @example
  * class ReadFileTool implements Tool<{ path: string }, ToolResult> {
@@ -86,29 +86,29 @@ export interface Tool<
 }
 
 // ============================================================
-// LLM Provider 的 Tool Schema 格式
+// Provider-specific tool schema formats
 // ============================================================
 
 /**
- * Anthropic (Claude) API 的 Tool Schema 格式
- * 用于将 Tool 转换为 Anthropic API 需要的格式
+ * Anthropic (Claude) API tool schema format.
+ * Used to convert a Tool into the format expected by the Anthropic API.
  *
  * @see https://docs.anthropic.com/en/docs/build-with-claude/tool-use
  */
 export interface AnthropicToolSchema {
   name: string;
   description: string;
-  input_schema: JsonSchema; // Anthropic 使用 input_schema 而非 parameters
+  input_schema: JsonSchema; // Anthropic uses `input_schema` instead of `parameters`
 }
 
 /**
- * OpenAI API 的 Tool Schema 格式
- * 用于将 Tool 转换为 OpenAI API 需要的格式
+ * OpenAI API tool schema format.
+ * Used to convert a Tool into the format expected by the OpenAI API.
  *
  * @see https://platform.openai.com/docs/guides/function-calling
  */
 export interface OpenAIToolSchema {
-  type: "function"; // OpenAI 要求必须指定 type 为 "function"
+  type: "function"; // OpenAI requires `type` to be "function"
   function: {
     name: string;
     description: string;
@@ -117,14 +117,14 @@ export interface OpenAIToolSchema {
 }
 
 // ============================================================
-// Schema 转换函数
+// Schema conversion
 // ============================================================
 
 /**
- * 将通用 Tool 转换为 Anthropic API 格式
+ * Convert a generic Tool to Anthropic API format.
  *
- * @param tool - 通用 Tool 对象
- * @returns Anthropic API 所需的 tool schema
+ * @param tool - Generic Tool object
+ * @returns Tool schema required by the Anthropic API
  */
 export function toAnthropicSchema(tool: Tool): AnthropicToolSchema {
   return {
@@ -135,10 +135,10 @@ export function toAnthropicSchema(tool: Tool): AnthropicToolSchema {
 }
 
 /**
- * 将通用 Tool 转换为 OpenAI API 格式
+ * Convert a generic Tool to OpenAI API format.
  *
- * @param tool - 通用 Tool 对象
- * @returns OpenAI API 所需的 tool schema
+ * @param tool - Generic Tool object
+ * @returns Tool schema required by the OpenAI API
  */
 export function toOpenAISchema(tool: Tool): OpenAIToolSchema {
   return {

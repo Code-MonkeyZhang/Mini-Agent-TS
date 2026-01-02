@@ -1,11 +1,11 @@
-// ============ 枚举 ============
+// ============ Enums ============
 
 export enum LLMProvider {
   ANTHROPIC = "anthropic",
   OPENAI = "openai",
 }
 
-// ============ 函数调用 ============
+// ============ Function Calling ============
 
 export interface FunctionCall {
   name: string;
@@ -18,15 +18,15 @@ export interface ToolCall {
   function: FunctionCall;
 }
 
-// ============ 消息 ============
+// ============ Messages ============
 
 export interface Message {
   role: "system" | "user" | "assistant" | "tool";
-  content: string | ContentBlock[]; // 可以是字符串或内容块数组
-  thinking?: string | null; // assistant 消息的扩展思考内容
+  content: string | ContentBlock[]; // Either a plain string or an array of content blocks
+  thinking?: string | null; // Extra reasoning/thinking content for assistant messages
   tool_calls?: ToolCall[] | null;
   tool_call_id?: string | null;
-  name?: string | null; // 用于 tool 角色
+  name?: string | null; // Used for tool role messages
 }
 
 export interface ContentBlock {
@@ -35,7 +35,7 @@ export interface ContentBlock {
   [key: string]: unknown;
 }
 
-// ============ Token 使用统计 ============
+// ============ Token Usage ============
 
 export interface TokenUsage {
   prompt_tokens: number;
@@ -43,17 +43,17 @@ export interface TokenUsage {
   total_tokens: number;
 }
 
-// ============ LLM 响应 ============
+// ============ LLM Response ============
 
 export interface LLMResponse {
   content: string;
-  thinking?: string | null; // 扩展思考块
+  thinking?: string | null; // Optional thinking content
   tool_calls?: ToolCall[] | null;
   finish_reason: string;
   usage?: TokenUsage | null;
 }
 
-// ============ 流式响应 ============
+// ============ Streaming ============
 
 export interface LLMStreamChunk {
   content?: string;
