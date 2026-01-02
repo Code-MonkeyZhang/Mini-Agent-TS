@@ -14,7 +14,7 @@ import { asyncRetry } from "../retry.js";
  * LLM client using OpenAI's protocol.
  *
  * This client uses the official OpenAI SDK and supports:
- * - Reasoning content (via reasoning_split=True)
+ * - Provider-specific reasoning/thinking fields (mapped into `LLMStreamChunk.thinking` when present)
  * - Tool calling
  */
 export class OpenAIClient extends LLMClientBase {
@@ -90,7 +90,6 @@ export class OpenAIClient extends LLMClientBase {
 
   /**
    * Converts various tool formats to OpenAI's schema.
-   *
    *
    * @param tools List of tools in mixed formats
    * @returns List of tools formatted for OpenAI API

@@ -56,8 +56,8 @@ export class Agent {
     this.systemPrompt = buildSystemPrompt(systemPrompt, workspaceDir);
     this.messages = [{ role: "system", content: this.systemPrompt }];
 
-    // TODO: Initialize logger
-    // TODO: Enable token accounting
+    // TODO: Add structured logging (levels, timestamps, optional file output).
+    // TODO: Track token usage and enforce tokenLimit via summarization/truncation.
 
     // Register tools with the agent
     for (const tool of tools) {
@@ -116,13 +116,11 @@ export class Agent {
 
   async run(): Promise<string> {
     for (let step = 0; step < this.maxSteps; step++) {
-      // TODO: Check and summarize message history to prevent context overflow
-
-      // Print header
+      // TODO: Summarize older messages when approaching tokenLimit.
       console.log();
       console.log("🤖 Assistant:");
 
-      // Stream output
+      // Stream thinking first, then main content. Print a separator when switching.
       let fullContent = "";
       let fullThinking = "";
       let toolCalls: ToolCall[] | null = null;
@@ -133,7 +131,6 @@ export class Agent {
         this.messages,
         toolList
       )) {
-        // Print thinking content
         if (chunk.thinking) {
           if (!isThinkingPrinted) {
             console.log("💭 Thinking:");
@@ -144,10 +141,8 @@ export class Agent {
           fullThinking += chunk.thinking;
         }
 
-        // Print main content
         if (chunk.content) {
           if (isThinkingPrinted && fullContent === "") {
-            // Thinking finished; start printing the main content
             console.log();
             console.log("─".repeat(SEPARATOR_WIDTH));
             console.log();
@@ -156,13 +151,11 @@ export class Agent {
           fullContent += chunk.content;
         }
 
-        // Collect tool calls
         if (chunk.tool_calls) {
           toolCalls = chunk.tool_calls;
         }
       }
 
-      // New line
       console.log();
 
       // Add assistant message

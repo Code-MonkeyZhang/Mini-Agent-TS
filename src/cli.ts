@@ -127,13 +127,11 @@ async function runAgent(workspaceDir: string): Promise<void> {
   console.log(`Agent starting in: ${workspaceDir}`);
   const sessionStartMs = Date.now();
 
-  // Load configuration
   const configPath = Config.getDefaultConfigPath();
   const config = Config.fromYaml(configPath);
   console.log(`Config loaded from: ${configPath}`);
   console.log(`Model: ${config.llm.model}, Provider: ${config.llm.provider},`);
 
-  // Initialize LLM client
   const llmClient = new LLMClient(
     config.llm.apiKey,
     config.llm.apiBase,
@@ -142,7 +140,6 @@ async function runAgent(workspaceDir: string): Promise<void> {
     config.llm.retry
   );
 
-  // Configure retry callback
   const onRetry = (error: unknown, attempt: number) => {
     console.log(`\n⚠️  LLM call failed (attempt ${attempt}): ${String(error)}`);
     const nextDelay = calculateDelay(attempt, config.llm.retry);
@@ -155,7 +152,6 @@ async function runAgent(workspaceDir: string): Promise<void> {
 
   llmClient.retryCallback = onRetry;
 
-  // Load system prompt
   let systemPrompt: string;
   let systemPromptPath = Config.findConfigFile(config.agent.systemPromptPath);
   if (systemPromptPath && fs.existsSync(systemPromptPath)) {
@@ -167,7 +163,6 @@ async function runAgent(workspaceDir: string): Promise<void> {
     console.log("⚠️  System prompt not found, using default");
   }
 
-  // Create tool list (workspace-dependent)
   const tools: Tool[] = [];
   if (config.tools.enableFileTools) {
     tools.push(new ReadTool(workspaceDir));
@@ -180,7 +175,6 @@ async function runAgent(workspaceDir: string): Promise<void> {
     tools.push(new BashKillTool());
   }
 
-  // Create Agent
   let agent = new Agent(
     llmClient,
     systemPrompt,
@@ -228,7 +222,6 @@ async function runAgent(workspaceDir: string): Promise<void> {
   };
   process.once("SIGINT", onSigint);
 
-  // Start agent main loop
   try {
     while (true) {
       let raw: string;
@@ -301,7 +294,7 @@ async function runAgent(workspaceDir: string): Promise<void> {
     rl.close();
     if (!interrupted) printStats(agent, sessionStartMs);
   }
-  // TODO: Clean up MCP connections
+  // TODO: Close MCP client connections / subprocesses before exit.
 }
 
 function resolveWorkspace(args: { workspace: string | undefined }): string {

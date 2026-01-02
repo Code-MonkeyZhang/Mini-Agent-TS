@@ -11,7 +11,7 @@ import { fileURLToPath } from "node:url";
 
 // ============ Configuration Types ============
 
-/** Retry configuration Default Value*/
+/** Retry configuration defaults. */
 export class RetryConfig {
   enabled: boolean = true;
   maxRetries: number = 3;
@@ -30,7 +30,7 @@ export class RetryConfig {
   }
 }
 
-/** LLM configuration */
+/** LLM configuration. */
 export class LLMConfig {
   apiKey: string;
   apiBase: string = "https://api.minimax.io";
@@ -47,7 +47,7 @@ export class LLMConfig {
   }
 }
 
-/** Agent configuration */
+/** Agent configuration. */
 export class AgentConfig {
   maxSteps: number = 50;
   workspaceDir: string = "./workspace";
@@ -61,7 +61,7 @@ export class AgentConfig {
   }
 }
 
-/** Tools configuration */
+/** Tools configuration. */
 export class ToolsConfig {
   enableFileTools: boolean = true;
   enableBash: boolean = true;
@@ -84,7 +84,7 @@ export class ToolsConfig {
   }
 }
 
-/** Main configuration class */
+/** Main configuration class. */
 export class Config {
   llm: LLMConfig;
   agent: AgentConfig;
