@@ -13,11 +13,15 @@
     "test": "vitest",
     "test:run": "vitest run",
     "typecheck": "tsc --noEmit",
-    "preflight": "npm run typecheck && npm run test:run"
+    "lint": "eslint \"src/**/*.ts\" \"tests/**/*.ts\"",
+    "lint:fix": "eslint \"src/**/*.ts\" \"tests/**/*.ts\" --fix",
+    "preflight": "npm run typecheck && npm run test:run && npm run lint"
   },
   "devDependencies": {
     "@types/node": "^24.10.2",
+    "eslint": "^9.24.0",
     "tsx": "^4.21.0",
+    "typescript-eslint": "^8.30.1",
     "typescript": "^5.9.3",
     "vitest": "^4.0.15"
   },

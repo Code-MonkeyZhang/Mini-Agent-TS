@@ -35,7 +35,7 @@ export class OpenAIClient extends LLMClientBase {
   protected override convertMessages(
     messages: Message[]
   ): [string | null, Record<string, any>[]] {
-    let apiMessages = [];
+    const apiMessages = [];
 
     for (const msg of messages) {
       // `msg` is a single message object

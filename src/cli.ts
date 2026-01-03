@@ -153,7 +153,7 @@ async function runAgent(workspaceDir: string): Promise<void> {
   llmClient.retryCallback = onRetry;
 
   let systemPrompt: string;
-  let systemPromptPath = Config.findConfigFile(config.agent.systemPromptPath);
+  const systemPromptPath = Config.findConfigFile(config.agent.systemPromptPath);
   if (systemPromptPath && fs.existsSync(systemPromptPath)) {
     systemPrompt = fs.readFileSync(systemPromptPath, "utf-8");
     console.log(`✅ Loaded system prompt (from: ${systemPromptPath})`);
@@ -175,7 +175,7 @@ async function runAgent(workspaceDir: string): Promise<void> {
     tools.push(new BashKillTool());
   }
 
-  let agent = new Agent(
+  const agent = new Agent(
     llmClient,
     systemPrompt,
     tools,

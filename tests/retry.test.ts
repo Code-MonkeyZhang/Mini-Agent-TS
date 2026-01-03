@@ -65,7 +65,7 @@ describe("Retry Mechanism", () => {
 
     try {
       await asyncRetry(async () => mockFn(), config, onRetry);
-    } catch (e) {
+    } catch (_e) {
       // Ignore the final error
     }
 
