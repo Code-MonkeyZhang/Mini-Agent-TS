@@ -32,13 +32,19 @@ export class OpenAIClient extends LLMClientBase {
     });
   }
 
+  /**
+   * Convert internal `Message[]` into OpenAI-compatible chat messages.
+   *
+   * @remarks
+   * - `thinking` is mapped to a provider-specific field (`reasoning_details`) when present.
+   * - `tool_calls` are converted to OpenAI's `tool_calls` shape with JSON-stringified arguments.
+   */
   protected override convertMessages(
     messages: Message[]
   ): [string | null, Record<string, any>[]] {
     const apiMessages = [];
 
     for (const msg of messages) {
-      // `msg` is a single message object
       if (msg.role === "system") {
         apiMessages.push({ role: "system", content: msg.content });
         continue;
@@ -158,6 +164,16 @@ export class OpenAIClient extends LLMClientBase {
     };
   }
 
+  /**
+   * Generate a streaming response from OpenAI-compatible providers.
+   *
+   * @remarks
+   * OpenAI tool calls may arrive incrementally across multiple stream chunks:
+   * - Each chunk can include partial `function.arguments` text
+   * - Chunks are grouped by `tool_call.index`
+   * This method accumulates the fragments and emits a consolidated `tool_calls`
+   * array once the stream reports a finish reason.
+   */
   public override async *generateStream(
     messages: Message[],
     tools?: any[] | null
@@ -171,7 +187,6 @@ export class OpenAIClient extends LLMClientBase {
 
     let stream: AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>;
 
-    // Use retry depending on `enabled`
     if (this.retryConfig.enabled) {
       stream = await asyncRetry(
         async () => {
@@ -204,6 +219,10 @@ export class OpenAIClient extends LLMClientBase {
       stream = await this.client.chat.completions.create(params);
     }
 
+    /**
+     * Accumulate tool call fragments by index because streaming responses can
+     * split a single tool call's arguments across many chunks.
+     */
     const toolCallAcc = new Map<
       number,
       {
@@ -235,6 +254,8 @@ export class OpenAIClient extends LLMClientBase {
       }
 
       let toolCalls: ToolCall[] | undefined;
+      // Only emit consolidated tool calls when the provider indicates the
+      // streamed response has reached a completion boundary.
       if (finishReason && toolCallAcc.size > 0) {
         toolCalls = Array.from(toolCallAcc.values()).map((call) => {
           let parsedArgs: Record<string, unknown> = {};

@@ -5,10 +5,15 @@ import {
 } from "../schema/schema.js";
 import { LLMClientBase } from "./base.js";
 import { OpenAIClient } from "./openai_client.js";
-// If you have an AnthropicClient implementation:
-// import { AnthropicClient } from "./anthropic_client.js";
 import { RetryConfig } from "../config.js";
 
+/**
+ * Provider-agnostic wrapper that delegates to a concrete `LLMClientBase`.
+ *
+ * @remarks
+ * Today, both `anthropic` and `openai` providers use `OpenAIClient` because the
+ * upstream endpoints speak an OpenAI-compatible protocol.
+ */
 export class LLMClient {
   public apiKey: string;
   public apiBase: string;
@@ -16,7 +21,6 @@ export class LLMClient {
   public model: string;
   public retryConfig: RetryConfig;
 
-  // Internal client instance; kept private for encapsulation.
   private _client: LLMClientBase;
 
   constructor(

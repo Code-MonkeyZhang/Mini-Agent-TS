@@ -183,7 +183,6 @@ export class Config {
    * @returns Path to the mini_agent package directory
    */
   static getPackageDir(): string {
-    // Get the directory where this config.ts file is located
     const here = path.dirname(fileURLToPath(import.meta.url));
     return path.resolve(here, "..");
   }
@@ -200,20 +199,17 @@ export class Config {
    * @returns Path to found config file, or null if not found
    */
   static findConfigFile(filename: string): string | null {
-    // Priority 1: Development mode - current directory's config/ subdirectory
     const devConfig = path.join(process.cwd(), "config", filename);
     if (fs.existsSync(devConfig)) {
       return devConfig;
     }
 
-    // Priority 2: User config directory
     const homeDir = process.env["HOME"] || process.env["USERPROFILE"] || "";
     const userConfig = path.join(homeDir, ".mini-agent-ts", "config", filename);
     if (fs.existsSync(userConfig)) {
       return userConfig;
     }
 
-    // Priority 3: Package installation directory's config/ subdirectory
     const packageConfig = path.join(Config.getPackageDir(), "config", filename);
     if (fs.existsSync(packageConfig)) {
       return packageConfig;
@@ -232,7 +228,6 @@ export class Config {
     if (configPath) {
       return configPath;
     }
-    // Fallback to package config directory for error message purposes
     return path.join(Config.getPackageDir(), "config", "config.yaml");
   }
 }
