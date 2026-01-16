@@ -24,7 +24,8 @@ export class LLMClient {
     apiBase: string,
     provider: string,
     model: string,
-    retryConfig: RetryConfig
+    retryConfig: RetryConfig,
+    retryCallback?: (error: unknown, attempt: number) => void
   ) {
     this.apiKey = apiKey;
     this.provider = provider;
@@ -35,18 +36,10 @@ export class LLMClient {
 
     switch (provider) {
       case LLMProvider.ANTHROPIC:
-        // Treat `api_base` as a fully-qualified base URL (do not auto-append suffixes).
-        fullApiBase = apiBase.replace(/\/+$/, "");
-        this._client = new OpenAIClient(
-          apiKey,
-          fullApiBase,
-          model,
-          retryConfig
-        );
-        break;
+        //TODO implement ANTHROPIC provider
+        throw new Error(`Unsupported provider: ${provider}`);
 
       case LLMProvider.OPENAI:
-        // Treat `api_base` as a fully-qualified base URL (do not auto-append suffixes).
         fullApiBase = apiBase.replace(/\/+$/, "");
         this._client = new OpenAIClient(
           apiKey,
@@ -61,6 +54,10 @@ export class LLMClient {
     }
 
     this.apiBase = fullApiBase;
+
+    if (retryCallback) {
+      this._client.retryCallback = retryCallback;
+    }
   }
 
   /**

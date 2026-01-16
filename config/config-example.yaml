@@ -22,3 +22,17 @@ retry:
 # ===== Agent Configuration =====
 max_steps: 100 # Maximum execution steps
 system_prompt_path: "system_prompt.md" # System prompt file (same config directory)
+
+# ===== Tools Configuration =====
+tools:
+  enable_file_tools: true
+  enable_bash: true
+  enable_note: true
+  enable_skills: true
+  skills_dir: "./skills"
+  enable_mcp: true
+  mcp_config_path: "mcp.json"
+  mcp:
+    connect_timeout: 10.0
+    execute_timeout: 60.0
+    sse_read_timeout: 120.0

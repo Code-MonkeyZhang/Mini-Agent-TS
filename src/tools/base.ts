@@ -67,13 +67,6 @@ export type ToolResultWithMeta<
  * @property parameters  - JSON Schema parameter definition (used by the LLM to construct valid args)
  * @method execute       - Async execution method that takes params and returns a result
  *
- * @example
- * class ReadFileTool implements Tool<{ path: string }, ToolResult> {
- *   name = "read_file";
- *   description = "Read file contents";
- *   parameters = { type: "object", properties: { path: { type: "string" } }, required: ["path"] };
- *   async execute({ path }) { ... }
- * }
  */
 export interface Tool<
   Input extends ToolInput = ToolInput,

@@ -1,29 +1,51 @@
 {
   "mcpServers": {
-    "minimax_search": {
-      "description": "MiniMax Search - Powerful web search and intelligent browsing ⭐",
-      "type": "stdio",
-      "command": "uvx",
-      "args": [
-        "--from",
-        "git+https://github.com/MiniMax-AI/minimax_search",
-        "minimax-search"
-      ],
+    "ticktick": {
+      "command": "/Users/zhangyufeng/Downloads/agent_space/mcp/ticktick-mcp-enhanced/.venv/bin/python",
+      "args": ["-m", "ticktick_mcp.cli", "run"],
+      "cwd": "/Users/zhangyufeng/Downloads/agent_space/mcp/ticktick-mcp-enhanced",
       "env": {
-        "JINA_API_KEY": "",
-        "SERPER_API_KEY": "",
-        "MINIMAX_API_KEY": ""
-      },
-      "disabled": true
+        "SSL_CERT_FILE": "/Users/zhangyufeng/Downloads/agent_space/mcp/ticktick-mcp-enhanced/.venv/lib/python3.11/site-packages/certifi/cacert.pem",
+        "REQUESTS_CA_BUNDLE": "/Users/zhangyufeng/Downloads/agent_space/mcp/ticktick-mcp-enhanced/.venv/lib/python3.11/site-packages/certifi/cacert.pem"
+      }
     },
-    "memory": {
-      "description": "Memory - Knowledge graph memory system (long-term memory based on graph database)",
+    "Notion": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcp.notion.com/mcp"]
+    },
+    "github": {
       "command": "npx",
       "args": [
         "-y",
-        "@modelcontextprotocol/server-memory"
-      ],
-      "disabled": true
+        "mcp-remote",
+        "https://api.githubcopilot.com/mcp/",
+        "--header",
+        "Authorization: Bearer ${GITHUB_TOKEN}"
+      ]
+    },
+    "zerolib-email": {
+      "command": "/Users/zhangyufeng/.local/bin/uv",
+      "args": [
+        "run",
+        "--directory",
+        "/Users/zhangyufeng/Downloads/agent_space/mcp/mcp-email-server",
+        "mcp-email-server",
+        "stdio"
+      ]
+    },
+    "chrome-control": {
+      "command": "node",
+      "args": [
+        "/Users/zhangyufeng/Downloads/agent_space/mcpb-main/examples/chrome-applescript/server/index.js"
+      ]
+    },
+    "auto-music-player": {
+      "command": "/Users/zhangyufeng/.local/bin/uv",
+      "args": ["run", "python", "src/server.py"],
+      "cwd": "/Users/zhangyufeng/Downloads/agent_space/mcp/CloudMusic_Auto_Player",
+      "env": {
+        "NETEASE_MUSIC_PATH": "/Applications/NeteaseMusic.app/Contents/MacOS/NeteaseMusic"
+      }
     }
   }
 }

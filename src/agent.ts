@@ -1,5 +1,6 @@
 import * as path from "node:path";
 import * as fs from "node:fs";
+import { Logger } from "./util/logger.js";
 import { LLMClient } from "./llm/llm_wrapper.js";
 import type { Message, ToolCall } from "./schema/index.js";
 import type { Tool, ToolResult } from "./tools/index.js";
@@ -66,6 +67,7 @@ export class Agent {
   }
 
   addUserMessage(content: string): void {
+    Logger.log("CHAT", "👤 User:", content);
     this.messages.push({ role: "user", content });
   }
 
@@ -158,6 +160,13 @@ export class Agent {
 
       console.log();
 
+      // [Debug] Log Assistant Response
+      Logger.log("CHAT", "🤖 Assistant:", {
+        content: fullContent,
+        thinking: fullThinking || null,
+        tool_calls: toolCalls
+      });
+
       // Add assistant message
       this.messages.push({
         role: "assistant",
@@ -182,7 +191,7 @@ export class Agent {
         const result = await this.executeTool(functionName, args);
 
         if (result.success) {
-          console.log(`✓ Tool use success`);
+          console.log(`✅ Tool use success`);
         } else {
           console.log(`✗ Error: ${result.error ?? "Unknown error"}`);
         }

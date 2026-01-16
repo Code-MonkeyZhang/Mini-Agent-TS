@@ -14,8 +14,12 @@ import {
   EditTool,
   ReadTool,
   WriteTool,
+  cleanupMcpConnections,
+  loadMcpToolsAsync,
+  setMcpTimeoutConfig,
   type Tool,
 } from "./tools/index.js";
+import { Logger } from "./util/logger.js";
 
 import { Agent } from "./agent.js";
 // ============ Utilities ============
@@ -121,24 +125,37 @@ function printStats(agent: Agent, sessionStartMs: number): void {
   console.log("─".repeat(40) + "\n");
 }
 
+function resolveWorkspace(args: { workspace: string | undefined }): string {
+  let workspaceDir: string;
+
+  if (args.workspace) {
+    workspaceDir = path.resolve(args.workspace);
+  } else {
+    workspaceDir = process.cwd();
+  }
+
+  // Ensure the workspace directory exists
+  if (!fs.existsSync(workspaceDir)) {
+    fs.mkdirSync(workspaceDir, { recursive: true });
+  }
+
+  return workspaceDir;
+}
+
 // ============ Main Startup Logic ============
 
 async function runAgent(workspaceDir: string): Promise<void> {
-  console.log(`Agent starting in: ${workspaceDir}`);
   const sessionStartMs = Date.now();
 
+  // Load Workspace dir
   const configPath = Config.getDefaultConfigPath();
   const config = Config.fromYaml(configPath);
   console.log(`Config loaded from: ${configPath}`);
-  console.log(`Model: ${config.llm.model}, Provider: ${config.llm.provider},`);
+  console.log(`Workspace: ${workspaceDir}`);
 
-  const llmClient = new LLMClient(
-    config.llm.apiKey,
-    config.llm.apiBase,
-    config.llm.provider,
-    config.llm.model,
-    config.llm.retry
-  );
+  printBanner();
+  console.log(`Model: ${config.llm.model}, Provider: ${config.llm.provider},`);
+  console.log(`Type /help for help, /exit to quit\n`);
 
   const onRetry = (error: unknown, attempt: number) => {
     console.log(`\n⚠️  LLM call failed (attempt ${attempt}): ${String(error)}`);
@@ -150,8 +167,17 @@ async function runAgent(workspaceDir: string): Promise<void> {
     );
   };
 
-  llmClient.retryCallback = onRetry;
+  // Create LLM Client
+  const llmClient = new LLMClient(
+    config.llm.apiKey,
+    config.llm.apiBase,
+    config.llm.provider,
+    config.llm.model,
+    config.llm.retry,
+    onRetry
+  );
 
+  // Load system prompt
   let systemPrompt: string;
   let systemPromptPath = Config.findConfigFile(config.agent.systemPromptPath);
   if (systemPromptPath && fs.existsSync(systemPromptPath)) {
@@ -163,6 +189,7 @@ async function runAgent(workspaceDir: string): Promise<void> {
     console.log("⚠️  System prompt not found, using default");
   }
 
+  // Load Tools & MCPs
   const tools: Tool[] = [];
   if (config.tools.enableFileTools) {
     tools.push(new ReadTool(workspaceDir));
@@ -174,7 +201,35 @@ async function runAgent(workspaceDir: string): Promise<void> {
     tools.push(new BashOutputTool());
     tools.push(new BashKillTool());
   }
+  if (config.tools.enableMcp) {
+    console.log("Loading MCP tools...");
+    const mcpConfig = config.tools.mcp;
+    setMcpTimeoutConfig({
+      connectTimeout: mcpConfig.connectTimeout,
+      executeTimeout: mcpConfig.executeTimeout,
+      sseReadTimeout: mcpConfig.sseReadTimeout,
+    });
 
+    const mcpConfigPath = Config.findConfigFile(config.tools.mcpConfigPath);
+    if (mcpConfigPath) {
+      const mcpTools = await loadMcpToolsAsync(mcpConfigPath);
+      if (mcpTools.length > 0) {
+        tools.push(...mcpTools);
+        const msg = `✅ Loaded ${mcpTools.length} MCP tools (from: ${mcpConfigPath})`;
+        Logger.log("startup", msg);
+      } else {
+        const msg = "⚠️  No available MCP tools found";
+        console.log(msg);
+        Logger.log("startup", msg);
+      }
+    } else {
+      const msg = `⚠️  MCP config file not found: ${config.tools.mcpConfigPath}`;
+      console.log(msg);
+      Logger.log("startup", msg);
+    }
+  }
+
+  // Init Agent
   let agent = new Agent(
     llmClient,
     systemPrompt,
@@ -182,11 +237,6 @@ async function runAgent(workspaceDir: string): Promise<void> {
     config.agent.maxSteps,
     workspaceDir
   );
-
-  printBanner();
-  console.log(`Model: ${config.llm.model}`);
-  console.log(`Workspace: ${workspaceDir}`);
-  console.log(`Type /help for help, /exit to quit\n`);
 
   const commands: string[] = [
     "/help",
@@ -290,37 +340,25 @@ async function runAgent(workspaceDir: string): Promise<void> {
       console.log("\n" + "─".repeat(60) + "\n");
     }
   } finally {
+    // Graceful Shutdown
     process.removeListener("SIGINT", onSigint);
     rl.close();
+    try {
+      await cleanupMcpConnections();
+    } catch (error) {
+      console.log(`⚠️  Error during MCP cleanup: ${String(error)}`);
+    }
     if (!interrupted) printStats(agent, sessionStartMs);
   }
-  // TODO: Close MCP client connections / subprocesses before exit.
-}
-
-function resolveWorkspace(args: { workspace: string | undefined }): string {
-  let workspaceDir: string;
-
-  if (args.workspace) {
-    workspaceDir = path.resolve(args.workspace);
-  } else {
-    workspaceDir = process.cwd();
-  }
-
-  // Ensure the workspace directory exists
-  if (!fs.existsSync(workspaceDir)) {
-    fs.mkdirSync(workspaceDir, { recursive: true });
-  }
-
-  return workspaceDir;
 }
 
 export async function run(): Promise<void> {
+  Logger.initialize("logs");
   const args = parseArgs();
 
   let workspaceDir: string;
   try {
     workspaceDir = resolveWorkspace(args);
-    console.log(`\nWorkspace initialized at: ${workspaceDir}`);
   } catch (error) {
     console.error(`❌ Error creating workspace directory: ${error}`);
     process.exit(1);

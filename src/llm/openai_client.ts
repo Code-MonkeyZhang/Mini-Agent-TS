@@ -1,14 +1,11 @@
 import OpenAI from "openai";
-import type {
-  Message,
-  LLMStreamChunk,
-  ToolCall,
-} from "../schema/index.js";
+import type { Message, LLMStreamChunk, ToolCall } from "../schema/index.js";
 import type { Tool } from "../tools/index.js";
 import { toOpenAISchema } from "../tools/index.js";
 import { LLMClientBase } from "./base.js";
 import { RetryConfig } from "../config.js";
 import { asyncRetry } from "../retry.js";
+import { Logger } from "../util/logger.js";
 
 /**
  * LLM client using OpenAI's protocol.
@@ -163,7 +160,9 @@ export class OpenAIClient extends LLMClientBase {
     tools?: any[] | null
   ): AsyncGenerator<LLMStreamChunk> {
     const requestParams = this.prepareRequest(messages, tools);
-    const apiMessages = requestParams["apiMessages"];
+    const apiMessages = requestParams[
+      "apiMessages"
+    ] as OpenAI.Chat.Completions.ChatCompletionMessageParam[];
     const toolSchemas =
       requestParams["tools"] && requestParams["tools"].length > 0
         ? this.convertTools(requestParams["tools"])
@@ -171,46 +170,63 @@ export class OpenAIClient extends LLMClientBase {
 
     let stream: AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>;
 
+    // Build request params
+    const buildParams =
+      (): OpenAI.Chat.Completions.ChatCompletionCreateParamsStreaming => {
+        const params: OpenAI.Chat.Completions.ChatCompletionCreateParamsStreaming =
+          {
+            model: this.model,
+            messages: apiMessages,
+            stream: true,
+          };
+        if (toolSchemas && toolSchemas.length > 0) {
+          (params as any).tools = toolSchemas;
+          (params as any).tool_choice = "auto";
+        }
+        return params;
+      };
+
     // Use retry depending on `enabled`
     if (this.retryConfig.enabled) {
       stream = await asyncRetry(
         async () => {
-          const params: OpenAI.Chat.Completions.ChatCompletionCreateParamsStreaming =
+          const params = buildParams();
+          Logger.debug(
+            "LLM DEBUG",
+            `➡️ Sending Streaming Request to ${this.model}:`,
             {
-              model: this.model,
-              messages:
-                apiMessages as OpenAI.Chat.Completions.ChatCompletionMessageParam[],
-              stream: true,
-            };
-          if (toolSchemas) {
-            (params as any).tools = toolSchemas;
-          }
+              messagesCount: params.messages.length,
+              toolsCount: (params as any).tools?.length ?? 0,
+              lastMessage: params.messages[params.messages.length - 1],
+            }
+          );
           return await this.client.chat.completions.create(params);
         },
         this.retryConfig,
         this.retryCallback
       );
     } else {
-      const params: OpenAI.Chat.Completions.ChatCompletionCreateParamsStreaming =
+      const params = buildParams();
+      Logger.debug(
+        "LLM DEBUG",
+        `➡️ Sending Streaming Request to ${this.model}:`,
         {
-          model: this.model,
-          messages:
-            apiMessages as OpenAI.Chat.Completions.ChatCompletionMessageParam[],
-          stream: true,
-        };
-      if (toolSchemas) {
-        (params as any).tools = toolSchemas;
-      }
+          messagesCount: params.messages.length,
+          toolsCount: (params as any).tools?.length ?? 0,
+          lastMessage: params.messages[params.messages.length - 1],
+        }
+      );
       stream = await this.client.chat.completions.create(params);
     }
 
+    // Accumulate tool_calls from streaming chunks (like Python does)
     const toolCallAcc = new Map<
       number,
       {
-        id?: string;
-        type?: string;
-        name?: string;
-        argumentsText?: string;
+        id: string;
+        type: string;
+        name: string;
+        argumentsText: string;
       }
     >();
 
@@ -218,22 +234,32 @@ export class OpenAIClient extends LLMClientBase {
       const delta = chunk.choices[0]?.delta;
       const finishReason = chunk.choices[0]?.finish_reason;
 
+      // Accumulate tool_calls from delta
       if (delta && (delta as any).tool_calls) {
         const incoming = (delta as any).tool_calls as any[];
-        incoming.forEach((call, idx) => {
-          const index = typeof call.index === "number" ? call.index : idx;
-          const existing = toolCallAcc.get(index) || {};
+        for (const call of incoming) {
+          const index = typeof call.index === "number" ? call.index : 0;
+
+          if (!toolCallAcc.has(index)) {
+            toolCallAcc.set(index, {
+              id: "",
+              type: "function",
+              name: "",
+              argumentsText: "",
+            });
+          }
+
+          const existing = toolCallAcc.get(index)!;
           if (call.id) existing.id = call.id;
           if (call.type) existing.type = call.type;
-          if (call.function?.name) existing.name = call.function.name;
+          if (call.function?.name) existing.name += call.function.name;
           if (call.function?.arguments) {
-            existing.argumentsText =
-              (existing.argumentsText || "") + call.function.arguments;
+            existing.argumentsText += call.function.arguments;
           }
-          toolCallAcc.set(index, existing);
-        });
+        }
       }
 
+      // Build final tool_calls when stream is done
       let toolCalls: ToolCall[] | undefined;
       if (finishReason && toolCallAcc.size > 0) {
         toolCalls = Array.from(toolCallAcc.values()).map((call) => {
@@ -254,6 +280,11 @@ export class OpenAIClient extends LLMClientBase {
             },
           };
         });
+        Logger.debug(
+          "LLM DEBUG",
+          `⬅️ Received Tool Calls (Streaming):`,
+          toolCalls
+        );
       }
 
       yield {

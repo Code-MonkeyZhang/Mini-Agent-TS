@@ -59,6 +59,22 @@ export class AgentConfig {
   }
 }
 
+/** MCP (Model Context Protocol) timeout configuration. */
+export class MCPConfig {
+  connectTimeout: number = 10.0;
+  executeTimeout: number = 60.0;
+  sseReadTimeout: number = 120.0;
+
+  constructor(data: Partial<MCPConfig> = {}) {
+    if (data.connectTimeout !== undefined)
+      this.connectTimeout = data.connectTimeout;
+    if (data.executeTimeout !== undefined)
+      this.executeTimeout = data.executeTimeout;
+    if (data.sseReadTimeout !== undefined)
+      this.sseReadTimeout = data.sseReadTimeout;
+  }
+}
+
 /** Tools configuration. */
 export class ToolsConfig {
   enableFileTools: boolean = true;
@@ -68,6 +84,7 @@ export class ToolsConfig {
   skillsDir: string = "./skills";
   enableMcp: boolean = true;
   mcpConfigPath: string = "mcp.json";
+  mcp: MCPConfig = new MCPConfig();
 
   constructor(data: Partial<ToolsConfig> = {}) {
     if (data.enableFileTools !== undefined)
@@ -79,6 +96,7 @@ export class ToolsConfig {
     if (data.enableMcp !== undefined) this.enableMcp = data.enableMcp;
     if (data.mcpConfigPath !== undefined)
       this.mcpConfigPath = data.mcpConfigPath;
+    if (data.mcp !== undefined) this.mcp = data.mcp;
   }
 }
 
@@ -161,6 +179,13 @@ export class Config {
 
     // Parse tools configuration
     const toolsData = (data["tools"] as Record<string, unknown>) || {};
+    const mcpData = (toolsData["mcp"] as Record<string, unknown>) || {};
+    const mcpConfig = new MCPConfig({
+      connectTimeout: mcpData["connect_timeout"] as number | undefined,
+      executeTimeout: mcpData["execute_timeout"] as number | undefined,
+      sseReadTimeout: mcpData["sse_read_timeout"] as number | undefined,
+    });
+
     const toolsConfig = new ToolsConfig({
       enableFileTools: toolsData["enable_file_tools"] as boolean | undefined,
       enableBash: toolsData["enable_bash"] as boolean | undefined,
@@ -169,6 +194,7 @@ export class Config {
       skillsDir: toolsData["skills_dir"] as string | undefined,
       enableMcp: toolsData["enable_mcp"] as boolean | undefined,
       mcpConfigPath: toolsData["mcp_config_path"] as string | undefined,
+      mcp: mcpConfig,
     });
 
     return new Config(llmConfig, agentConfig, toolsConfig);
