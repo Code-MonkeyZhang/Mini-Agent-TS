@@ -22,3 +22,6 @@ config/mcp.json
 
 # log
 logs
+
+# Test python scripts
+test_python_script/
