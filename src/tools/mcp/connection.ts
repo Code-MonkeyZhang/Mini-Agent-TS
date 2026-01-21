@@ -45,7 +45,7 @@ export class MCPTool implements Tool {
     const timeoutMs = this.executeTimeoutSec * 1000;
 
     // [Debug] Log Request
-    Logger.debug("MCP DEBUG", `➡️ Calling '${this.name}' with args:`, params);
+    Logger.debug("MCP DEBUG", `Calling '${this.name}' with args:`, params);
 
     try {
       const result = await withTimeout(
@@ -60,7 +60,7 @@ export class MCPTool implements Tool {
       );
 
       // [Debug] Log Response
-      Logger.debug("MCP DEBUG", `⬅️ Result from '${this.name}':`, result);
+      Logger.debug("MCP DEBUG", `Result from '${this.name}':`, result);
 
       const content = normalizeContent(result.content);
       const isError = Boolean(result.isError ?? result.is_error ?? false);

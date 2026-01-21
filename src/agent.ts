@@ -56,7 +56,7 @@ export class Agent {
   }
 
   addUserMessage(content: string): void {
-    Logger.log("CHAT", "👤 User:", content);
+    Logger.log("CHAT", "User:", content);
     this.messages.push({ role: "user", content });
   }
 
@@ -152,7 +152,7 @@ export class Agent {
         console.log();
       }
 
-      Logger.log("CHAT", "🤖 Assistant:", {
+      Logger.log("CHAT", "Assistant:", {
         content: fullContent,
         thinking: fullThinking || null,
         tool_calls: toolCalls
