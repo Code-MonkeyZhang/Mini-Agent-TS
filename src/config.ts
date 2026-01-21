@@ -29,6 +29,9 @@ const DEFAULTS = {
     maxSteps: 50,
     systemPromptPath: "system_prompt.md",
   },
+  LOGGING: {
+    enableLogging: false,
+  },
   MCP: {
     connectTimeout: 10.0,
     executeTimeout: 60.0,
@@ -78,6 +81,8 @@ const ConfigSchema = z.object({
   model: z.string().default(DEFAULTS.LLM.model),
   provider: z.enum(["anthropic", "openai"]).default(DEFAULTS.LLM.provider),
 
+  enableLogging: z.boolean().default(DEFAULTS.LOGGING.enableLogging),
+
   retry: RetrySchema,
 
   maxSteps: z.number().default(DEFAULTS.AGENT.maxSteps),
@@ -92,16 +97,20 @@ const ConfigSchema = z.object({
     provider: data.provider,
     retry: data.retry,
   },
+  logging: {
+    enableLogging: data.enableLogging,
+  },
   agent: {
     maxSteps: data.maxSteps,
     systemPromptPath: data.systemPromptPath,
   },
-  tools: data.tools
+  tools: data.tools,
 }));
 
 // ============ Types ============
 
 export type RetryConfig = z.infer<typeof RetrySchema>; // 创建一个名为 RetryConfig 的类型，它包含了 RetrySchema 中定义的所有字段
+export type LoggingConfig = z.infer<typeof ConfigSchema>['logging'];
 export type ToolsConfig = z.infer<typeof ToolsSchema>;
 export type LLMConfig = z.infer<typeof ConfigSchema>['llm'];
 export type AgentConfig = z.infer<typeof ConfigSchema>['agent'];
@@ -110,11 +119,13 @@ export type AgentConfig = z.infer<typeof ConfigSchema>['agent'];
 
 export class Config {
   llm: LLMConfig;
+  logging: LoggingConfig;
   agent: AgentConfig;
   tools: ToolsConfig;
 
   constructor(data: z.infer<typeof ConfigSchema>) {
     this.llm = data.llm;
+    this.logging = data.logging;
     this.agent = data.agent;
     this.tools = data.tools;
   }

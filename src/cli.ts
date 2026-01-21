@@ -21,6 +21,7 @@ import {
 import { Logger } from "./util/logger.js";
 
 import { Agent } from "./agent.js";
+
 // ============ Utilities ============
 
 function getProjectVersion(): string {
@@ -113,6 +114,10 @@ async function runAgent(workspaceDir: string): Promise<void> {
   const config = Config.fromYaml(configPath);
   console.log(`Config loaded from: ${configPath}`);
   console.log(`Workspace: ${workspaceDir}`);
+
+  if (config.logging.enableLogging) {
+    Logger.initialize();
+  }
 
   printBanner();
   console.log(`Model: ${config.llm.model}`)
@@ -272,7 +277,6 @@ async function runAgent(workspaceDir: string): Promise<void> {
 }
 
 export async function run(): Promise<void> {
-  Logger.initialize("logs");
   const args = parseArgs();
 
   let workspaceDir: string;
