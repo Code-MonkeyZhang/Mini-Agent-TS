@@ -13,7 +13,7 @@
     "test": "vitest",
     "test:run": "vitest run",
     "typecheck": "tsc --noEmit",
-    "preflight": "npm run typecheck && npm run test:run"
+    "preflight": "npm run build && npm run test:run && npm link"
   },
   "devDependencies": {
     "@types/node": "^24.10.2",
