@@ -17,7 +17,7 @@ type BashKillInput = {
   bash_id: string;
 };
 
-export type BashOutputResult = ToolResultWithMeta<{
+type BashOutputResult = ToolResultWithMeta<{
   stdout: string;
   stderr: string;
   exit_code: number;

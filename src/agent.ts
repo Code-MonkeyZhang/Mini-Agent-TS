@@ -101,10 +101,8 @@ export class Agent {
 
   async run(): Promise<string> {
     for (let step = 0; step < this.maxSteps; step++) {
-      // Step 之前：1 个空行
-      console.log();
-
       // Step Header
+      console.log();
       console.log(drawStepHeader(step + 1, this.maxSteps));
 
       let fullContent = "";

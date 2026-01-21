@@ -7,7 +7,7 @@ export enum LLMProvider {
 
 // ============ Function Calling ============
 
-export interface FunctionCall {
+interface FunctionCall {
   name: string;
   arguments: Record<string, unknown>;
 }
@@ -42,37 +42,16 @@ export type Message =
       name?: string;
     };
 
-export interface ContentBlock {
+interface ContentBlock {
   type: string;
   text?: string;
   [key: string]: unknown;
 }
-
-// ============ Token Usage ============
-
-export interface TokenUsage {
-  prompt_tokens: number;
-  completion_tokens: number;
-  total_tokens: number;
-}
-
-// ============ LLM Response ============
-
-export interface LLMResponse {
-  content: string;
-  thinking?: string | null; // Optional thinking content
-  tool_calls?: ToolCall[] | null;
-  finish_reason: string;
-  usage?: TokenUsage | null;
-}
-
-// ============ Streaming ============
 
 export interface LLMStreamChunk {
   content?: string;
   thinking?: string;
   tool_calls?: ToolCall[];
   finish_reason?: string;
-  usage?: TokenUsage;
   done: boolean;
 }

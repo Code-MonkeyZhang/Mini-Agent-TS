@@ -8,14 +8,14 @@ export interface MCPTimeoutConfig {
   sseReadTimeout: number;
 }
 
-export interface McpToolDefinition {
+interface McpToolDefinition {
   name: string;
   description?: string;
   inputSchema?: JsonSchema;
   input_schema?: JsonSchema;
 }
 
-export interface McpListToolsResult {
+interface McpListToolsResult {
   tools: McpToolDefinition[];
 }
 

@@ -2,11 +2,7 @@
 
 export {
   LLMProvider,
-  type FunctionCall,
   type ToolCall,
   type Message,
-  type ContentBlock,
-  type TokenUsage,
-  type LLMResponse,
   type LLMStreamChunk,
 } from "./schema.js";

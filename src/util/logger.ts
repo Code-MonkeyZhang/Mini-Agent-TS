@@ -23,8 +23,6 @@ export class Logger {
       fs.appendFileSync(this.logFile, fileEntry);
     }
 
-    // Console logging removed as per user request to reduce noise
-    // console.log(`[${category}] ${message}`, data ? formattedData : "");
   }
 
   static debug(category: string, message: string, data?: any) {
