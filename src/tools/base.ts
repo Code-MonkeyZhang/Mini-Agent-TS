@@ -1,7 +1,3 @@
-// ============================================================
-// JSON Schema type definitions
-// ============================================================
-
 /**
  * JSON Schema type.
  * Used to describe a Tool's parameter structure following the JSON Schema spec.
@@ -15,9 +11,6 @@ export type JsonSchema = Record<string, unknown>;
  */
 export type ToolInput = Record<string, unknown>;
 
-// ============================================================
-// Tool execution result
-// ============================================================
 
 /**
  * Unified structure for Tool execution results.
@@ -52,15 +45,12 @@ export type ToolResultWithMeta<
   TMeta extends Record<string, unknown> = Record<string, never>
 > = ToolResult & TMeta;
 
-// ============================================================
-// Tool interface
-// ============================================================
 
 /**
  * Tool interface - the core interface all tools must implement.
  *
  * @template Input  - Input parameter type accepted by the tool
- * @template Output - Result type returned by the tool (must extend ToolResult)
+ * @template Output - Result type returned by the tool
  *
  * @property name        - Tool name (used by the LLM when calling the tool)
  * @property description - Tool description (tells the LLM what it does and how to use it)
@@ -78,68 +68,3 @@ export interface Tool<
   execute(params: Input): Promise<Output>;
 }
 
-// ============================================================
-// Provider-specific tool schema formats
-// ============================================================
-
-/**
- * Anthropic (Claude) API tool schema format.
- * Used to convert a Tool into the format expected by the Anthropic API.
- *
- * @see https://docs.anthropic.com/en/docs/build-with-claude/tool-use
- */
-export interface AnthropicToolSchema {
-  name: string;
-  description: string;
-  input_schema: JsonSchema; // Anthropic uses `input_schema` instead of `parameters`
-}
-
-/**
- * OpenAI API tool schema format.
- * Used to convert a Tool into the format expected by the OpenAI API.
- *
- * @see https://platform.openai.com/docs/guides/function-calling
- */
-export interface OpenAIToolSchema {
-  type: "function"; // OpenAI requires `type` to be "function"
-  function: {
-    name: string;
-    description: string;
-    parameters: JsonSchema;
-  };
-}
-
-// ============================================================
-// Schema conversion
-// ============================================================
-
-/**
- * Convert a generic Tool to Anthropic API format.
- *
- * @param tool - Generic Tool object
- * @returns Tool schema required by the Anthropic API
- */
-export function toAnthropicSchema(tool: Tool): AnthropicToolSchema {
-  return {
-    name: tool.name,
-    description: tool.description,
-    input_schema: tool.parameters,
-  };
-}
-
-/**
- * Convert a generic Tool to OpenAI API format.
- *
- * @param tool - Generic Tool object
- * @returns Tool schema required by the OpenAI API
- */
-export function toOpenAISchema(tool: Tool): OpenAIToolSchema {
-  return {
-    type: "function",
-    function: {
-      name: tool.name,
-      description: tool.description,
-      parameters: tool.parameters,
-    },
-  };
-}

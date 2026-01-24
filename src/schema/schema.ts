@@ -39,7 +39,7 @@ export type Message =
       role: "tool";
       content: string;
       tool_call_id: string;
-      name?: string;
+      tool_name?: string;
     };
 
 interface ContentBlock {

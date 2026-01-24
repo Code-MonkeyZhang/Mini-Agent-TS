@@ -5,7 +5,6 @@ import { fileURLToPath } from "node:url";
 import { createInterface } from "node:readline/promises";
 import { Config } from "./config.js";
 import { LLMClient } from "./llm-client/llm-client.js";
-import { calculateDelay, RetryExhaustedError } from "./retry.js";
 import {
   BashKillTool,
   BashOutputTool,
@@ -125,24 +124,13 @@ async function runAgent(workspaceDir: string): Promise<void> {
   console.log(`Base URL: ${config.llm.apiBase}`);
   console.log(`Type 'exit' to quit\n`);
 
-  const onRetry = (error: unknown, attempt: number) => {
-    console.log(`\n⚠️  LLM call failed (attempt ${attempt}): ${String(error)}`);
-    const nextDelay = calculateDelay(attempt, config.llm.retry);
-    console.log(
-      `   Retrying in ${(nextDelay / 1000).toFixed(1)}s (attempt ${
-        attempt + 1
-      })...`
-    );
-  };
-
   // Create LLM Client
   const llmClient = new LLMClient(
     config.llm.apiKey,
     config.llm.apiBase,
     config.llm.provider,
     config.llm.model,
-    config.llm.retry,
-    onRetry
+    config.llm.retry
   );
 
   // Check connection
@@ -250,14 +238,11 @@ async function runAgent(workspaceDir: string): Promise<void> {
       try {
         await agent.run();
       } catch (error) {
-        if (error instanceof RetryExhaustedError) {
-          console.log(
-            `\n❌ LLM request failed after ${error.attempts} attempts.`
-          );
-          console.log(`   Last error: ${String(error.lastError)}`);
+        if (error instanceof Error) {
+          console.log(`\n❌ Error: ${error.message}`);
           console.log("   Please check your API key and configuration.\n");
-        } else if (error instanceof Error) {
-          console.log(`\n❌ Unexpected error: ${error.message}`);
+        } else {
+          console.log(`\n❌ Unexpected error: ${String(error)}`);
           console.log("   Please try again or report this issue.\n");
         }
 

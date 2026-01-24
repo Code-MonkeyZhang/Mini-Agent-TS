@@ -152,12 +152,6 @@ export class Agent {
         console.log();
       }
 
-      Logger.log("CHAT", "Assistant:", {
-        content: fullContent,
-        thinking: fullThinking || null,
-        tool_calls: toolCalls
-      });
-
       this.messages.push({
         role: "assistant",
         content: fullContent,
@@ -212,7 +206,7 @@ export class Agent {
             ? result.content
             : `Error: ${result.error ?? "Unknown error"}`,
           tool_call_id: toolCallId,
-          name: functionName,
+          tool_name: functionName,
         });
       }
     }

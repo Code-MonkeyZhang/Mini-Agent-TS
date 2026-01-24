@@ -30,4 +30,27 @@ export class Logger {
   static debug(category: string, message: string, data?: any) {
     this.log(category, message, data);
   }
+
+  static logLLMRequest(request: any) {
+    this.log("LLM REQUEST", "Full Request JSON", request);
+  }
+
+  static logLLMResponse(response: any) {
+    this.log("LLM RESPONSE", "Full Response Data", response);
+  }
 }
+
+export const sdkLoggerAdapter = {
+  debug(message: string, ...args: unknown[]) {
+    Logger.log("LLM SDK", message, args.length > 0 ? args : undefined);
+  },
+  info(message: string, ...args: unknown[]) {
+    Logger.log("LLM SDK", message, args.length > 0 ? args : undefined);
+  },
+  warn(message: string, ...args: unknown[]) {
+    Logger.log("LLM SDK WARN", message, args.length > 0 ? args : undefined);
+  },
+  error(message: string, ...args: unknown[]) {
+    Logger.log("LLM SDK ERROR", message, args.length > 0 ? args : undefined);
+  },
+};

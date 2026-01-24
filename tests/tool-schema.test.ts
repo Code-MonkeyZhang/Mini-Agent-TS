@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest";
 import type { Tool, ToolResult } from "../src/tools/base.js";
-import { toAnthropicSchema, toOpenAISchema } from "../src/tools/base.js";
 
 class MockWeatherTool implements Tool<{ location: string }> {
   name = "get_weather";
@@ -62,31 +61,25 @@ class MockEnumTool implements Tool<{ status: "open" | "closed" }> {
   }
 }
 
-describe("Tool schema helpers", () => {
-  it("should convert tool to Anthropic schema", () => {
+describe("Tool interface", () => {
+  it("should implement Tool interface correctly", () => {
     const tool = new MockWeatherTool();
-    const schema = toAnthropicSchema(tool);
 
-    expect(schema.name).toBe("get_weather");
-    expect(schema.description).toBe(tool.description);
-    expect(schema.input_schema).toEqual(tool.parameters);
-  });
-
-  it("should convert tool to OpenAI schema", () => {
-    const tool = new MockWeatherTool();
-    const schema = toOpenAISchema(tool);
-
-    expect(schema.type).toBe("function");
-    expect(schema.function.name).toBe("get_weather");
-    expect(schema.function.description).toBe(tool.description);
-    expect(schema.function.parameters).toEqual(tool.parameters);
+    expect(tool.name).toBe("get_weather");
+    expect(tool.description).toBe("Get weather by city name");
+    expect(tool.parameters).toEqual({
+      type: "object",
+      properties: {
+        location: { type: "string", description: "City name" },
+        unit: { type: "string", enum: ["c", "f"], description: "Unit" },
+      },
+      required: ["location"],
+    });
   });
 
   it("should handle complex schemas", () => {
     const tool = new MockSearchTool();
-    const schema = toAnthropicSchema(tool);
-    const inputSchema = schema.input_schema as Record<string, unknown>;
-    const properties = inputSchema["properties"] as Record<string, unknown>;
+    const properties = tool.parameters["properties"] as Record<string, unknown>;
     expect(properties["filters"]).toBeDefined();
   });
 
@@ -98,16 +91,11 @@ describe("Tool schema helpers", () => {
     expect(tools.length).toBe(2);
     expect(tools[0].name).toBe("get_weather");
     expect(tools[1].name).toBe("search");
-
-    const openaiSchemas = tools.map((t) => toOpenAISchema(t));
-    expect(openaiSchemas[0].function.name).toBe("get_weather");
-    expect(openaiSchemas[1].function.name).toBe("search");
   });
 
   it("should preserve enum parameters", () => {
     const tool = new MockEnumTool();
-    const schema = toOpenAISchema(tool);
-    const params = schema.function.parameters as Record<string, unknown>;
+    const params = tool.parameters as Record<string, unknown>;
     const properties = params["properties"] as Record<string, unknown>;
     const status = properties["status"] as { enum?: string[] };
     expect(status.enum).toEqual(["open", "closed"]);

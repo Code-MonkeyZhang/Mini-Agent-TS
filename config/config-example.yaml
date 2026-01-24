@@ -20,9 +20,6 @@ systemPromptPath: "system_prompt.md" # System prompt file (same config directory
 retry:
   enabled: true # Enable retry mechanism
   maxRetries: 3 # Maximum number of retries
-  initialDelay: 1.0 # Initial delay time (seconds)
-  maxDelay: 60.0 # Maximum delay time (seconds)
-  exponentialBase: 2.0 # Exponential backoff base (delay = initialDelay * base^attempt)
 
 # ===== Tools Configuration =====
 tools:

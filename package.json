@@ -22,6 +22,7 @@
     "vitest": "^4.0.15"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.71.2",
     "@modelcontextprotocol/sdk": "^1.1.0",
     "commander": "^14.0.2",
     "openai": "^6.10.0",

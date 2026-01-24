@@ -1,4 +1,5 @@
 import type { Message, LLMStreamChunk } from "../schema/index.js";
+import type { Tool } from "../tools/index.js";
 import { Config, type RetryConfig } from "../config.js";
 
 export abstract class LLMClientBase {
@@ -6,7 +7,6 @@ export abstract class LLMClientBase {
   public apiBase: string;
   public model: string;
   public retryConfig: RetryConfig;
-  public retryCallback: ((error: unknown, attempt: number) => void) | null;
 
   /**
    * Initialize the LLM client.
@@ -26,7 +26,6 @@ export abstract class LLMClientBase {
     this.apiBase = apiBase;
     this.model = model;
     this.retryConfig = retryConfig ?? Config.createDefaultRetryConfig();
-    this.retryCallback = null;
   }
 
   /**
@@ -38,7 +37,7 @@ export abstract class LLMClientBase {
    */
   public abstract generateStream(
     messages: Message[],
-    tools?: unknown[] | null
+    tools?: Tool[] | null
   ): AsyncGenerator<LLMStreamChunk>;
 
   /**
@@ -50,7 +49,7 @@ export abstract class LLMClientBase {
    */
   public abstract prepareRequest(
     messages: Message[],
-    tools?: unknown[] | null
+    tools?: Tool[] | null
   ): Record<string, any>;
 
   /**

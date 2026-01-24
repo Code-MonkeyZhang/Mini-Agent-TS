@@ -16,9 +16,6 @@ const DEFAULTS = {
   RETRY: {
     enabled: true,
     maxRetries: 3,
-    initialDelay: 1.0,
-    maxDelay: 60.0,
-    exponentialBase: 2.0,
   },
   LLM: {
     apiBase: "https://api.minimax.io",
@@ -53,9 +50,6 @@ const DEFAULTS = {
 const RetrySchema = z.object({
   enabled: z.boolean().default(DEFAULTS.RETRY.enabled),
   maxRetries: z.number().default(DEFAULTS.RETRY.maxRetries),
-  initialDelay: z.number().default(DEFAULTS.RETRY.initialDelay),
-  maxDelay: z.number().default(DEFAULTS.RETRY.maxDelay),
-  exponentialBase: z.number().default(DEFAULTS.RETRY.exponentialBase),
 });
 
 const MCPSchema = z.object({

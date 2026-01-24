@@ -4,10 +4,6 @@ export {
   type ToolResult,
   type ToolResultWithMeta,
   type Tool,
-  type AnthropicToolSchema,
-  type OpenAIToolSchema,
-  toAnthropicSchema,
-  toOpenAISchema,
 } from "./base.js";
 
 export { ReadTool, WriteTool, EditTool } from "./file-tools.js";
