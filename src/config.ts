@@ -37,7 +37,7 @@ const DEFAULTS = {
   TOOLS: {
     skillsDir: "./skills",
     mcpConfigPath: "mcp.json",
-  }
+  },
 };
 
 // ============ Schemas ============
@@ -59,45 +59,47 @@ const ToolsSchema = z.object({
   mcp: MCPSchema,
 });
 
-const ConfigSchema = z.object({
-  apiKey: z.string().min(1, "Please configure a valid API Key"),
-  apiBase: z.string().default(DEFAULTS.LLM.apiBase),
-  model: z.string().default(DEFAULTS.LLM.model),
-  provider: z.enum(["anthropic", "openai"]).default(DEFAULTS.LLM.provider),
+const ConfigSchema = z
+  .object({
+    apiKey: z.string().min(1, "Please configure a valid API Key"),
+    apiBase: z.string().default(DEFAULTS.LLM.apiBase),
+    model: z.string().default(DEFAULTS.LLM.model),
+    provider: z.enum(["anthropic", "openai"]).default(DEFAULTS.LLM.provider),
 
-  enableLogging: z.boolean().default(DEFAULTS.LOGGING.enableLogging),
+    enableLogging: z.boolean().default(DEFAULTS.LOGGING.enableLogging),
 
-  retry: RetrySchema,
+    retry: RetrySchema,
 
-  maxSteps: z.number().default(DEFAULTS.AGENT.maxSteps),
-  systemPromptPath: z.string().default(DEFAULTS.AGENT.systemPromptPath),
+    maxSteps: z.number().default(DEFAULTS.AGENT.maxSteps),
+    systemPromptPath: z.string().default(DEFAULTS.AGENT.systemPromptPath),
 
-  tools: ToolsSchema,
-}).transform(data => ({
-  llm: {
-    apiKey: data.apiKey,
-    apiBase: data.apiBase,
-    model: data.model,
-    provider: data.provider,
-    retry: data.retry,
-  },
-  logging: {
-    enableLogging: data.enableLogging,
-  },
-  agent: {
-    maxSteps: data.maxSteps,
-    systemPromptPath: data.systemPromptPath,
-  },
-  tools: data.tools,
-}));
+    tools: ToolsSchema,
+  })
+  .transform((data) => ({
+    llm: {
+      apiKey: data.apiKey,
+      apiBase: data.apiBase,
+      model: data.model,
+      provider: data.provider,
+      retry: data.retry,
+    },
+    logging: {
+      enableLogging: data.enableLogging,
+    },
+    agent: {
+      maxSteps: data.maxSteps,
+      systemPromptPath: data.systemPromptPath,
+    },
+    tools: data.tools,
+  }));
 
 // ============ Types ============
 
 export type RetryConfig = z.infer<typeof RetrySchema>; // 创建一个名为 RetryConfig 的类型，它包含了 RetrySchema 中定义的所有字段
-export type LoggingConfig = z.infer<typeof ConfigSchema>['logging'];
+export type LoggingConfig = z.infer<typeof ConfigSchema>["logging"];
 export type ToolsConfig = z.infer<typeof ToolsSchema>;
-export type LLMConfig = z.infer<typeof ConfigSchema>['llm'];
-export type AgentConfig = z.infer<typeof ConfigSchema>['agent'];
+export type LLMConfig = z.infer<typeof ConfigSchema>["llm"];
+export type AgentConfig = z.infer<typeof ConfigSchema>["agent"];
 
 // ============ Config Class ============
 
@@ -113,7 +115,6 @@ export class Config {
     this.agent = data.agent;
     this.tools = data.tools;
   }
-
 
   static createDefaultRetryConfig(): RetryConfig {
     return RetrySchema.parse({});
@@ -165,7 +166,10 @@ export class Config {
       return userConfig;
     }
 
-    const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+    const packageRoot = path.resolve(
+      path.dirname(fileURLToPath(import.meta.url)),
+      "..",
+    );
     const packageConfig = path.join(packageRoot, "config", filename);
     if (fs.existsSync(packageConfig)) {
       return packageConfig;
@@ -173,5 +177,4 @@ export class Config {
 
     return null;
   }
-
 }

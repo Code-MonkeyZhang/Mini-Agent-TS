@@ -205,30 +205,30 @@ async function runAgent(workspaceDir: string): Promise<void> {
 
   // Load MCPs
   console.log("Loading MCP tools...");
-    const mcpConfig = config.tools.mcp;
-    setMcpTimeoutConfig({
-      connectTimeout: mcpConfig.connectTimeout,
-      executeTimeout: mcpConfig.executeTimeout,
-      sseReadTimeout: mcpConfig.sseReadTimeout,
-    });
+  const mcpConfig = config.tools.mcp;
+  setMcpTimeoutConfig({
+    connectTimeout: mcpConfig.connectTimeout,
+    executeTimeout: mcpConfig.executeTimeout,
+    sseReadTimeout: mcpConfig.sseReadTimeout,
+  });
 
-    const mcpConfigPath = Config.findConfigFile(config.tools.mcpConfigPath);
-    if (mcpConfigPath) {
-      const mcpTools = await loadMcpToolsAsync(mcpConfigPath);
-      if (mcpTools.length > 0) {
-        tools.push(...mcpTools);
-        const msg = `✅ Loaded ${mcpTools.length} MCP tools (from: ${mcpConfigPath})`;
-        Logger.log("startup", msg);
-      } else {
-        const msg = "⚠️  No available MCP tools found";
-        console.log(msg);
-        Logger.log("startup", msg);
-      }
+  const mcpConfigPath = Config.findConfigFile(config.tools.mcpConfigPath);
+  if (mcpConfigPath) {
+    const mcpTools = await loadMcpToolsAsync(mcpConfigPath);
+    if (mcpTools.length > 0) {
+      tools.push(...mcpTools);
+      const msg = `✅ Loaded ${mcpTools.length} MCP tools (from: ${mcpConfigPath})`;
+      Logger.log("startup", msg);
     } else {
-      const msg = `⚠️  MCP config file not found: ${config.tools.mcpConfigPath}`;
+      const msg = "⚠️  No available MCP tools found";
       console.log(msg);
       Logger.log("startup", msg);
     }
+  } else {
+    const msg = `⚠️  MCP config file not found: ${config.tools.mcpConfigPath}`;
+    console.log(msg);
+    Logger.log("startup", msg);
+  }
 
   // Init Agent
   let agent = new Agent(

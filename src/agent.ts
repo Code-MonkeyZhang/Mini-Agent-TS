@@ -6,7 +6,6 @@ import { LLMClient } from "./llm-client/llm-client.js";
 import type { Message, ToolCall } from "./schema/index.js";
 import type { Tool, ToolResult } from "./tools/index.js";
 
-
 function buildSystemPrompt(basePrompt: string, workspaceDir: string): string {
   if (basePrompt.includes("Current Workspace")) {
     return basePrompt;
@@ -21,7 +20,6 @@ All relative paths will be resolved relative to this directory.`
   );
 }
 
-
 export class Agent {
   public llmClient: LLMClient;
   public systemPrompt: string;
@@ -35,7 +33,7 @@ export class Agent {
     systemPrompt: string,
     tools: Tool[],
     maxSteps: number,
-    workspaceDir: string
+    workspaceDir: string,
   ) {
     this.llmClient = llmClient;
     this.maxSteps = maxSteps;
@@ -74,7 +72,7 @@ export class Agent {
 
   async executeTool(
     name: string,
-    params: Record<string, unknown>
+    params: Record<string, unknown>,
   ): Promise<ToolResult> {
     const tool = this.getTool(name);
     if (!tool) {
@@ -113,14 +111,16 @@ export class Agent {
       const toolList = this.listTools();
       for await (const chunk of this.llmClient.generateStream(
         this.messages,
-        toolList
+        toolList,
       )) {
         if (chunk.thinking) {
           if (!isThinkingPrinted) {
             console.log();
             console.log(`${Colors.DIM}─${"─".repeat(60)}${Colors.RESET}`);
             console.log();
-            console.log(`${Colors.BOLD}${Colors.BRIGHT_MAGENTA}🧠 Thinking:${Colors.RESET}`);
+            console.log(
+              `${Colors.BOLD}${Colors.BRIGHT_MAGENTA}🧠 Thinking:${Colors.RESET}`,
+            );
             isThinkingPrinted = true;
           }
           process.stdout.write(chunk.thinking);
@@ -133,11 +133,15 @@ export class Agent {
             console.log();
             console.log(`${Colors.DIM}─${"─".repeat(60)}${Colors.RESET}`);
             console.log();
-            console.log(`${Colors.BOLD}${Colors.BRIGHT_BLUE}📝 Response:${Colors.RESET}`);
+            console.log(
+              `${Colors.BOLD}${Colors.BRIGHT_BLUE}📝 Response:${Colors.RESET}`,
+            );
           } else if (!isThinkingPrinted && fullContent === "") {
             // 只有 Response，无 Thinking：1 个空行 + Response 标题
             console.log();
-            console.log(`${Colors.BOLD}${Colors.BRIGHT_BLUE}📝 Response:${Colors.RESET}`);
+            console.log(
+              `${Colors.BOLD}${Colors.BRIGHT_BLUE}📝 Response:${Colors.RESET}`,
+            );
           }
           process.stdout.write(chunk.content);
           fullContent += chunk.content;
@@ -169,7 +173,9 @@ export class Agent {
         const args = toolCall.function.arguments || {};
 
         // Tool 标题
-        console.log(`\n${Colors.BOLD}${Colors.BRIGHT_YELLOW}🔧 Tool: ${functionName}${Colors.RESET}`);
+        console.log(
+          `\n${Colors.BOLD}${Colors.BRIGHT_YELLOW}🔧 Tool: ${functionName}${Colors.RESET}`,
+        );
 
         // Arguments
         console.log(`${Colors.DIM}   Arguments:${Colors.RESET}`);
@@ -193,11 +199,17 @@ export class Agent {
           let resultText = result.content;
           const MAX_LENGTH = 300;
           if (resultText.length > MAX_LENGTH) {
-            resultText = resultText.slice(0, MAX_LENGTH) + `${Colors.DIM}...${Colors.RESET}`;
+            resultText =
+              resultText.slice(0, MAX_LENGTH) +
+              `${Colors.DIM}...${Colors.RESET}`;
           }
-          console.log(`${Colors.BRIGHT_GREEN}✓${Colors.RESET} ${Colors.BOLD}${Colors.BRIGHT_GREEN}Success:${Colors.RESET} ${resultText}\n`);
+          console.log(
+            `${Colors.BRIGHT_GREEN}✓${Colors.RESET} ${Colors.BOLD}${Colors.BRIGHT_GREEN}Success:${Colors.RESET} ${resultText}\n`,
+          );
         } else {
-          console.log(`${Colors.BRIGHT_RED}✗${Colors.RESET} ${Colors.BOLD}${Colors.BRIGHT_RED}Error:${Colors.RESET} ${Colors.RED}${result.error ?? "Unknown error"}${Colors.RESET}\n`);
+          console.log(
+            `${Colors.BRIGHT_RED}✗${Colors.RESET} ${Colors.BOLD}${Colors.BRIGHT_RED}Error:${Colors.RESET} ${Colors.RED}${result.error ?? "Unknown error"}${Colors.RESET}\n`,
+          );
         }
 
         this.messages.push({

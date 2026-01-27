@@ -6,7 +6,12 @@ export class Logger {
   private static logFile: string | null = null;
 
   static initialize(logDir?: string) {
-    const logsDir = logDir ?? path.join(path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", ".."), "logs");
+    const logsDir =
+      logDir ??
+      path.join(
+        path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", ".."),
+        "logs",
+      );
     if (!fs.existsSync(logsDir)) {
       fs.mkdirSync(logsDir, { recursive: true });
     }
@@ -17,19 +22,22 @@ export class Logger {
 
   static log(category: string, message: string, data?: any) {
     const timestamp = new Date().toISOString();
-    
+
     let formattedData = "";
     if (data !== undefined && data !== null) {
       if (typeof data === "string") {
         // Format string data with newlines and indentation
-        formattedData = `\n${data.split("\n").map(line => `  ${line}`).join("\n")}`;
+        formattedData = `\n${data
+          .split("\n")
+          .map((line) => `  ${line}`)
+          .join("\n")}`;
       } else {
         formattedData = JSON.stringify(data, null, 2);
       }
     }
-    
+
     const fileEntry = `[${timestamp}] [${category}] ${message}${formattedData}\n`;
-    
+
     // Write to file if initialized
     if (this.logFile) {
       fs.appendFileSync(this.logFile, fileEntry);
