@@ -155,16 +155,12 @@ async function runAgent(workspaceDir: string): Promise<void> {
 
   // Load Tools & MCPs
   const tools: Tool[] = [];
-  if (config.tools.enableFileTools) {
-    tools.push(new ReadTool(workspaceDir));
-    tools.push(new WriteTool(workspaceDir));
-    tools.push(new EditTool(workspaceDir));
-  }
-  if (config.tools.enableBash) {
-    tools.push(new BashTool());
-    tools.push(new BashOutputTool());
-    tools.push(new BashKillTool());
-  }
+  tools.push(new ReadTool(workspaceDir));
+  tools.push(new WriteTool(workspaceDir));
+  tools.push(new EditTool(workspaceDir));
+  tools.push(new BashTool());
+  tools.push(new BashOutputTool());
+  tools.push(new BashKillTool());
 
   // Load Skills
   console.log("Loading Claude Skills...");
@@ -208,8 +204,7 @@ async function runAgent(workspaceDir: string): Promise<void> {
   }
 
   // Load MCPs
-  if (config.tools.enableMcp) {
-    console.log("Loading MCP tools...");
+  console.log("Loading MCP tools...");
     const mcpConfig = config.tools.mcp;
     setMcpTimeoutConfig({
       connectTimeout: mcpConfig.connectTimeout,
@@ -234,7 +229,6 @@ async function runAgent(workspaceDir: string): Promise<void> {
       console.log(msg);
       Logger.log("startup", msg);
     }
-  }
 
   // Init Agent
   let agent = new Agent(

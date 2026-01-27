@@ -35,11 +35,7 @@ const DEFAULTS = {
     sseReadTimeout: 120.0,
   },
   TOOLS: {
-    enableFileTools: true,
-    enableBash: true,
-    enableNote: true,
     skillsDir: "./skills",
-    enableMcp: true,
     mcpConfigPath: "mcp.json",
   }
 };
@@ -58,11 +54,7 @@ const MCPSchema = z.object({
 });
 
 const ToolsSchema = z.object({
-  enableFileTools: z.boolean().default(DEFAULTS.TOOLS.enableFileTools),
-  enableBash: z.boolean().default(DEFAULTS.TOOLS.enableBash),
-  enableNote: z.boolean().default(DEFAULTS.TOOLS.enableNote),
   skillsDir: z.string().default(DEFAULTS.TOOLS.skillsDir),
-  enableMcp: z.boolean().default(DEFAULTS.TOOLS.enableMcp),
   mcpConfigPath: z.string().default(DEFAULTS.TOOLS.mcpConfigPath),
   mcp: MCPSchema,
 });
