@@ -109,6 +109,81 @@ mini-agent-ts -w ./my-workspace
 
 ---
 
+## 🎯 Agent 技能 (Beta)
+
+Mini-Agent 支持 **Agent 技能** - 模块化、自包含的包，通过专业知识、工作流程和工具扩展 Claude 的能力。
+
+### 启用技能
+
+技能默认已启用。如有需要，你可以在 `config.yaml` 中配置：
+
+```yaml
+tools:
+  enableSkills: true
+  skillsDir: "./skills"  # 技能目录路径
+```
+
+### 创建技能目录
+
+在你的项目中或指定位置创建一个 `skills` 目录：
+
+```bash
+# 创建 skills 目录
+mkdir skills
+
+# 创建你的第一个技能
+mkdir skills/my-skill
+```
+
+### 技能结构
+
+每个技能必须包含一个带有 YAML 前置元数据的 `SKILL.md` 文件：
+
+```
+skills/my-skill/
+└── SKILL.md  # 必需 - 技能入口点
+```
+
+### SKILL.md 格式
+
+```markdown
+---
+name: my-skill
+description: 技能的简短描述，说明技能用途和使用场景
+---
+
+# 技能标题
+
+你的技能内容...
+```
+
+### 可用技能
+
+当你的 skills 目录中有技能时，Mini-Agent 会：
+
+1. **发现** 所有技能（自动扫描）
+2. **注入** 技能名称和描述到系统提示词
+3. **加载** 当你调用 `get_skill` 工具时获取完整技能内容
+
+使用 `get_skill` 工具加载技能的完整内容：
+
+```
+你 > 我需要帮助创建一个 Dockerfile
+
+Agent > 让我加载 dockerfile-builder 技能...
+[Agent 调用 get_skill 工具]
+
+Assistant > # Skill: dockerfile-builder
+
+[完整的技能内容现在对 Agent 可见]
+```
+
+### 示例技能
+
+你可以在 [`skills-example`](./skills-example/) 目录中找到示例技能。
+
+---
+
 ## 👨‍💻 开发者指南
 
 如果你想参与开发或调试代码，可以使用以下命令：

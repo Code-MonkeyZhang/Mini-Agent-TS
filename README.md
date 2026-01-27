@@ -109,6 +109,81 @@ You'll see the welcome screen `🤖 Mini Agent`. Now give instructions conversat
 
 ---
 
+## 🎯 Agent Skills (Beta)
+
+Mini-Agent supports **Agent Skills** - modular, self-contained packages that extend Claude's capabilities with specialized knowledge, workflows, and tools.
+
+### Enable Skills
+
+Skills are enabled by default. If needed, you can configure skills in `config.yaml`:
+
+```yaml
+tools:
+  enableSkills: true
+  skillsDir: "./skills"  # Path to skills directory
+```
+
+### Create Skills Directory
+
+Create a `skills` directory in your project or anywhere you specify:
+
+```bash
+# Create skills directory
+mkdir skills
+
+# Create your first skill
+mkdir skills/my-skill
+```
+
+### Skill Structure
+
+Each skill must contain a `SKILL.md` file with YAML frontmatter:
+
+```
+skills/my-skill/
+└── SKILL.md  # Required - skill entry point
+```
+
+### SKILL.md Format
+
+```markdown
+---
+name: my-skill
+description: A brief description of what this skill does and when to use it
+---
+
+# Skill Title
+
+Your skill content here...
+```
+
+### Available Skills
+
+When you have skills in the skills directory, Mini-Agent will:
+
+1. **Discover** all skills automatically
+2. **Inject** skill names and descriptions into the system prompt
+3. **Load** full skill content when you call the `get_skill` tool
+
+Use the `get_skill` tool to load a skill's full content:
+
+```
+You > I need help creating a Dockerfile
+
+Agent > Let me load the dockerfile-builder skill...
+[Agent calls get_skill tool]
+
+Assistant > # Skill: dockerfile-builder
+
+[Full skill content is now available to the agent]
+```
+
+### Example Skills
+
+You can find example skills in the [`skills-example`](./skills-example/) directory.
+
+---
+
 ## 👨‍💻 Developer Guide
 
 For development/debugging, use these commands:

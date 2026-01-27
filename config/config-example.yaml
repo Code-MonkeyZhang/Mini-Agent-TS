@@ -23,13 +23,13 @@ retry:
 
 # ===== Tools Configuration =====
 tools:
-  enableFileTools: true
-  enableBash: true
-  enableNote: true
-  enableSkills: true
-  skillsDir: "./skills-example"
-  enableMcp: true
-  mcpConfigPath: "mcp.json"
+  enableFileTools: true   # Enable file read/write/edit tools
+  enableBash: true        # Enable bash command execution tool
+  enableNote: true        # Enable note-taking tool
+  enableSkills: true      # Enable Agent Skills (see README for details)
+  skillsDir: "./skills"   # Directory containing skills (each skill is a folder with SKILL.md)
+  enableMcp: true         # Enable MCP (Model Context Protocol) tools
+  mcpConfigPath: "mcp.json"  # MCP configuration file path
   mcp:
     connectTimeout: 10.0
     executeTimeout: 60.0
