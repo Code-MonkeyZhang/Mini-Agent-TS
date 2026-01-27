@@ -1,10 +1,12 @@
-import { Command } from "commander";
 import * as path from "node:path";
 import * as fs from "node:fs";
+import { Command } from "commander";
 import { fileURLToPath } from "node:url";
 import { createInterface } from "node:readline/promises";
 import { Config } from "./config.js";
 import { LLMClient } from "./llm-client/llm-client.js";
+import { Logger } from "./util/logger.js";
+import { Agent } from "./agent.js";
 import {
   BashKillTool,
   BashOutputTool,
@@ -17,9 +19,6 @@ import {
   setMcpTimeoutConfig,
   type Tool,
 } from "./tools/index.js";
-import { Logger } from "./util/logger.js";
-
-import { Agent } from "./agent.js";
 
 // ============ Utilities ============
 
@@ -68,12 +67,12 @@ function parseArgs(): { workspace: string | undefined } {
 Examples:
   mini-agent-ts                              # Use current directory as workspace
   mini-agent-ts --workspace /path/to/dir     # Use specific workspace directory
-      `
+      `,
     );
 
   program.option(
     "-w, --workspace <dir>",
-    "Workspace directory (default: current directory)"
+    "Workspace directory (default: current directory)",
   );
 
   program.parse(process.argv);
@@ -119,8 +118,8 @@ async function runAgent(workspaceDir: string): Promise<void> {
   }
 
   printBanner();
-  console.log(`Model: ${config.llm.model}`)
-  console.log(`Provider: ${config.llm.provider}`)  
+  console.log(`Model: ${config.llm.model}`);
+  console.log(`Provider: ${config.llm.provider}`);
   console.log(`Base URL: ${config.llm.apiBase}`);
   console.log(`Type 'exit' to quit\n`);
 
@@ -130,7 +129,7 @@ async function runAgent(workspaceDir: string): Promise<void> {
     config.llm.apiBase,
     config.llm.provider,
     config.llm.model,
-    config.llm.retry
+    config.llm.retry,
   );
 
   // Check connection
@@ -153,7 +152,6 @@ async function runAgent(workspaceDir: string): Promise<void> {
       "You are Mini-Agent, an intelligent assistant powered by MiniMax M2 that can help users complete various tasks.";
     console.log("⚠️  System prompt not found, using default");
   }
-  Logger.log("startup", "System Prompt Content:", systemPrompt);
 
   // Load Tools & MCPs
   const tools: Tool[] = [];
@@ -167,6 +165,49 @@ async function runAgent(workspaceDir: string): Promise<void> {
     tools.push(new BashOutputTool());
     tools.push(new BashKillTool());
   }
+
+  // Load Skills
+  console.log("Loading Claude Skills...");
+  const skillsDir = config.tools.skillsDir;
+
+  // Create directory if it doesn't exist
+  if (!fs.existsSync(skillsDir)) {
+    console.log(`⚠️  Skills directory does not exist: ${skillsDir}`);
+    fs.mkdirSync(skillsDir, { recursive: true });
+    console.log(`✅ Created skills directory: ${skillsDir}`);
+  }
+
+  // Load skills
+  try {
+    const { SkillLoader, GetSkillTool } = await import("./skills/index.js");
+    const skillLoader = new SkillLoader(skillsDir);
+    const discoveredSkills = skillLoader.discoverSkills();
+
+    if (discoveredSkills.length > 0) {
+      // Inject find skill tool
+      tools.push(new GetSkillTool(skillLoader));
+
+      // Inject skills metadata into system prompt
+      const skillsMetadata = skillLoader.getSkillsMetadataPrompt();
+      systemPrompt += "\n\n" + skillsMetadata;
+
+      // Log skills info
+      Logger.log(
+        "startup",
+        "Skills Loaded:",
+        discoveredSkills.map((s) => s.name),
+      );
+      Logger.log("startup", "Full System Prompt:", systemPrompt);
+
+      console.log(`✅ Loaded ${discoveredSkills.length} skill(s)`);
+    } else {
+      console.log("⚠️  No skills found in skills directory");
+    }
+  } catch (error) {
+    console.error(`❌ Failed to load skills: ${error}`);
+  }
+
+  // Load MCPs
   if (config.tools.enableMcp) {
     console.log("Loading MCP tools...");
     const mcpConfig = config.tools.mcp;
@@ -201,7 +242,7 @@ async function runAgent(workspaceDir: string): Promise<void> {
     systemPrompt,
     tools,
     config.agent.maxSteps,
-    workspaceDir
+    workspaceDir,
   );
 
   const rl = createInterface({

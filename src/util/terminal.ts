@@ -110,3 +110,23 @@ export function drawStepHeader(step: number, maxSteps: number): string {
 
   return "\n" + lines.join("\n");
 }
+
+export function printBanner(): void {
+  const BOX_WIDTH = 58;
+  const bannerText = "🤖 Mini Agent - Multi-turn Interactive Session";
+
+  const bannerWidth = bannerText.length;
+  const totalPadding = BOX_WIDTH - bannerWidth;
+  const leftPaddingCount = Math.floor(totalPadding / 2);
+  const rightPaddingCount = totalPadding - leftPaddingCount;
+
+  const leftPadding = " ".repeat(Math.max(0, leftPaddingCount));
+  const rightPadding = " ".repeat(Math.max(0, rightPaddingCount));
+  const horizontalLine = "═".repeat(BOX_WIDTH);
+
+  console.log();
+  console.log(`╔${horizontalLine}╗`);
+  console.log(`║${leftPadding}${bannerText}${rightPadding}║`);
+  console.log(`╚${horizontalLine}╝`);
+  console.log();
+}

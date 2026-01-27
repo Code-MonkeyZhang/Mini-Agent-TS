@@ -1,4 +1,4 @@
-# Dependency directory
+# Dependency
 node_modules
 
 # Editors
@@ -9,16 +9,18 @@ node_modules
 .DS_Store
 Thumbs.db
 
-# TypeScript build info files
+# build related
 *.tsbuildinfo
 dist
 
-#agent
+#agent 
 agent_memory
+
 
 # Config
 config/config.yaml
 config/mcp.json
+skills/*
 
 # log
 logs

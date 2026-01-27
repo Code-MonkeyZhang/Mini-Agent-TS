@@ -173,74 +173,63 @@ export class MCPServerConnection {
     });
   }
 
-  async connect(): Promise<boolean> {
-    const connectTimeoutMs = this.getConnectTimeoutSec() * 1000;
-    try {
-      const transport = await this.createTransport();
-      const ClientCtor = await loadClientConstructor();
-      const client = new ClientCtor({
-        name: "mini-agent-ts",
-        version: "0.0.1",
-      }) as unknown as McpClient;
+   async connect(): Promise<boolean> {
+     const connectTimeoutMs = this.getConnectTimeoutSec() * 1000;
+     try {
+       const transport = await this.createTransport();
+       const ClientCtor = await loadClientConstructor();
+       const client = new ClientCtor({
+         name: "mini-agent-ts",
+         version: "0.0.1",
+       }) as unknown as McpClient;
 
-      Logger.debug(
-        "MCP DEBUG",
-        `🔌 Connecting to MCP server '${this.name}'...`
-      );
+       const toolsList = await withTimeout(
+         (async () => {
+           await client.connect(transport);
+           return await client.listTools();
+         })(),
+         connectTimeoutMs,
+         `Connection to MCP server '${
+           this.name
+         }' timed out after ${toSecondsLabel(this.getConnectTimeoutSec())}.`
+       );
 
-      const toolsList = await withTimeout(
-        (async () => {
-          await client.connect(transport);
-          return await client.listTools();
-        })(),
-        connectTimeoutMs,
-        `Connection to MCP server '${
-          this.name
-        }' timed out after ${toSecondsLabel(this.getConnectTimeoutSec())}.`
-      );
+       this.session = client;
+       this.transport = transport;
 
-      Logger.debug(
-        "MCP DEBUG",
-        `🔌 Connected to '${this.name}', discovered tools:`,
-        toolsList
-      );
+       const executeTimeout = this.getExecuteTimeoutSec();
+       for (const tool of toolsList.tools ?? []) {
+         const rawParameters = tool.inputSchema ?? tool.input_schema ?? {};
+         const normalizedParameters = normalizeToolSchema(rawParameters);
+         const normalizedDescription = normalizeToolDescription(
+           tool.description ?? ""
+         );
 
-      this.session = client;
-      this.transport = transport;
+         this.tools.push(
+           new MCPTool({
+             name: tool.name,
+             description: normalizedDescription,
+             parameters: normalizedParameters,
+             session: client,
+             executeTimeoutSec: executeTimeout,
+           })
+         );
+       }
 
-      const executeTimeout = this.getExecuteTimeoutSec();
-      for (const tool of toolsList.tools ?? []) {
-        const rawParameters = tool.inputSchema ?? tool.input_schema ?? {};
-        const normalizedParameters = normalizeToolSchema(rawParameters);
-        const normalizedDescription = normalizeToolDescription(
-          tool.description ?? ""
-        );
+       const connectedMsg = `✅ Connected to MCP server '${this.name}' (${this.connectionType}) - loaded ${this.tools.length} tools`;
+       console.log(connectedMsg);
+       Logger.log("startup", connectedMsg);
 
-        this.tools.push(
-          new MCPTool({
-            name: tool.name,
-            description: normalizedDescription,
-            parameters: normalizedParameters,
-            session: client,
-            executeTimeoutSec: executeTimeout,
-          })
-        );
-      }
-
-      const connectedMsg = `✅ Connected to MCP server '${this.name}' (${this.connectionType}) - loaded ${this.tools.length} tools`;
-      console.log(connectedMsg);
-      Logger.log("MCP", connectedMsg);
-
-      return true;
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : String(error);
-      const msg = `✗ Failed to connect to MCP server '${this.name}': ${message}`;
-      console.log(msg);
-      Logger.debug("MCP", msg);
-      await this.disconnect();
-      return false;
-    }
-  }
+       return true;
+     } catch (error: unknown) {
+       const message = error instanceof Error ? error.message : String(error);
+       const msg = `✗ Failed to connect to MCP server '${this.name}': ${message}`;
+       console.log(msg);
+       Logger.log("startup", msg);
+       await this.disconnect();
+       return false;
+     }
+   }
 
   async disconnect(): Promise<void> {
     const session = this.session;

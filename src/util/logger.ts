@@ -17,14 +17,23 @@ export class Logger {
 
   static log(category: string, message: string, data?: any) {
     const timestamp = new Date().toISOString();
-    const formattedData = data ? JSON.stringify(data, null, 2) : "";
-    const fileEntry = `[${timestamp}] [${category}] ${message} ${formattedData}\n`;
+    
+    let formattedData = "";
+    if (data !== undefined && data !== null) {
+      if (typeof data === "string") {
+        // Format string data with newlines and indentation
+        formattedData = `\n${data.split("\n").map(line => `  ${line}`).join("\n")}`;
+      } else {
+        formattedData = JSON.stringify(data, null, 2);
+      }
+    }
+    
+    const fileEntry = `[${timestamp}] [${category}] ${message}${formattedData}\n`;
     
     // Write to file if initialized
     if (this.logFile) {
       fs.appendFileSync(this.logFile, fileEntry);
     }
-
   }
 
   static debug(category: string, message: string, data?: any) {
