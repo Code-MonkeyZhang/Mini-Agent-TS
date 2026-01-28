@@ -1,0 +1,14 @@
+node_modules
+dist
+*.min.js
+*.min.ts
+logs
+.git
+.vscode
+coverage
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+*.config.js
+*.config.cjs
+database.sqlite
